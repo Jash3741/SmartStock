@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartStock Inventory Dashboard</title>
+  <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body>
+  <div class="dashboard-app">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark"><span></span><span></span><span></span></div>
+        <div class="brand-text">Smart<span>Stock</span></div>
+      </div>
+
+      <button class="workspace-card">
+        <div class="workspace-icon">▣</div>
+        <div class="workspace-info">
+          <strong>Northline Ops</strong>
+          <small>4 locations</small>
+        </div>
+        <div class="workspace-arrows">⌃<br>⌄</div>
+      </button>
+
+      <div class="nav-section">
+        <div class="nav-title">WORKSPACE</div>
+        <a href="#" class="nav-item active"><span>▦</span>Dashboard</a>
+        <a href="/<%= reqUser._id %>/products/add" class="nav-item"><span>⊕</span>Add Product</a>
+        <a href="/inventory" class="nav-item"><span>♧</span>Inventory</a>
+        <a href="#" class="nav-item"><span>$</span>Sales</a>
+        <a href="#" class="nav-item"><span>▥</span>Reports</a>
+      </div>
+
+      <div class="nav-section manage-section">
+        <div class="nav-title">MANAGE</div>
+        <a href="#" class="nav-item"><span>▱</span>Suppliers</a>
+        <a href="#" class="nav-item"><span>⌖</span>Locations</a>
+        <a href="#" class="nav-item"><span>⚙</span>Settings</a>
+      </div>
+
+      <div class="sidebar-bottom">
+        <div class="health-card">
+          <div class="health-header">
+            <span>Inventory health</span>
+            <strong>92%</strong>
+          </div>
+          <div class="health-bar"><span></span></div>
+          <small>12,486 SKUs synced · 2m ago</small>
+        </div>
+        <a href="/<%=reqUser._id%>/user/profile">
+        <div class="user-card">
+          <div class="avatar">TM</div>
+          <div class="user-info">
+            <strong><%=reqUser.username%></strong>
+            <!-- <small>Operations admin</small> -->
+          </div>
+        
+          <i class="online-dot"></i>
+        </div>
+      </div>
+    </aside>
+  </a>
+    <!-- Main -->
+    <main class="main">
+      <header class="topbar">
+        <div class="search">
+          <span class="search-icon">⌕</span>
+          <input type="search" placeholder="Search products, SKUs, suppliers...">
+          <kbd>⌘ K</kbd>
+        </div>
+
+        <div class="top-actions">
+          <div class="sync-pill"><i></i>SYNCED NOW</div>
+          <button class="icon-button">?</button>
+          <button class="icon-button bell">♧<i></i></button>
+          <button class="date-button">▣&nbsp;&nbsp; Sep 1 – Sep 30 <span>⌄</span></button>
+        </div>
+      </header>
+
+      <div class="content">
+        <div class="welcome-row">
+          <div>
+            <h1>Good morning,<%= reqUser.username %> <span>👋</span></h1>
+            <p>Here’s what’s happening across your inventory today.</p>
+          </div>
+          <div class="welcome-buttons">
+            <button class="secondary-button">▧&nbsp; Generate Report</button>
+          <a href="/<%= reqUser._id %>/products/add"><button type="button" class="primary-button" onclick="openAddProduct()">
+               ＋ Add Product
+          </button>
+          </a>
+          </div>
+        </div>
+
+        <!-- KPI cards -->
+        <section class="kpi-grid">
+          <article class="kpi-card">
+            <div class="kpi-head">
+              <div class="kpi-icon green">$</div>
+              <span>•••</span>
+            </div>
+            <div class="kpi-label">Inventory value</div>
+            <strong class="kpi-number">$284.6k</strong>
+            <div class="kpi-meta"><b>+8.2%</b> vs. last month</div>
+            <div class="mini-bars green-bars"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          </article>
+
+          <article class="kpi-card">
+            <div class="kpi-head">
+              <div class="kpi-icon blue">♧</div>
+              <span>•••</span>
+            </div>
+            <div class="kpi-label">Units in stock</div>
+            <strong class="kpi-number">18,429</strong>
+            <div class="kpi-meta"><b class="blue-text">+4.6%</b> 842 received</div>
+            <div class="mini-bars blue-bars"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          </article>
+
+          <article class="kpi-card">
+            <div class="kpi-head">
+              <div class="kpi-icon orange">△</div>
+              <span>•••</span>
+            </div>
+            <div class="kpi-label">Low-stock items</div>
+            <strong class="kpi-number">24</strong>
+            <div class="kpi-meta"><b class="orange-text">6 urgent</b> Needs attention</div>
+            <div class="mini-bars orange-bars"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          </article>
+
+          <article class="kpi-card">
+            <div class="kpi-head">
+              <div class="kpi-icon green">▥</div>
+              <span>•••</span>
+            </div>
+            <div class="kpi-label">Sales this month</div>
+            <strong class="kpi-number">$96.2k</strong>
+            <div class="kpi-meta"><b>+12.4%</b> 1,284 orders</div>
+            <div class="mini-bars green-bars"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          </article>
+        </section>
+
+        <!-- Analytics row -->
+        <section class="analytics-grid">
+
+          <article class="panel sales-panel">
+            <div class="panel-header">
+              <div>
+                <h2>Sales performance</h2>
+                <p>Revenue across all locations</p>
+              </div>
+              <button class="filter-button">Last 30 days⌄</button>
+            </div>
+
+            <div class="sales-total">
+              <strong>$96,240</strong>
+              <span>↗ <b>12.4%</b> vs previous period</span>
+            </div>
+
+            <div class="line-chart">
+              <div class="gridline g1"></div>
+              <div class="gridline g2"></div>
+              <div class="gridline g3"></div>
+              <div class="gridline g4"></div>
+              <svg viewBox="0 0 560 150" preserveAspectRatio="none" aria-hidden="true">
+                <path d="M2,125
+                         C30,120 58,130 83,112
+                         C110,94 127,95 152,96
+                         C179,96 192,80 213,72
+                         C233,64 242,58 267,61
+                         C287,63 300,59 316,49
+                         C333,39 349,46 367,49
+                         C391,53 403,35 429,31
+                         C450,28 472,35 491,23
+                         C516,8 533,17 558,3"
+                      fill="none" stroke="#2bd182" stroke-width="3" stroke-linecap="round"/>
+                <circle cx="558" cy="3" r="4.5" fill="#0e273b"/>
+              </svg>
+              <div class="chart-tag">$4.8k</div>
+            </div>
+
+            <div class="chart-axis">
+              <span>Sep 01</span><span>Sep 08</span><span>Sep 15</span><span>Sep 22</span><span>Sep 30</span>
+            </div>
+          </article>
+
+          <article class="panel movement-panel">
+            <div class="panel-header">
+              <div>
+                <h2>Stock movement</h2>
+                <p>Units received vs. dispatched</p>
+              </div>
+              <button class="filter-button">6 weeks⌄</button>
+            </div>
+
+            <div class="movement-totals">
+              <div><span>INBOUND</span><strong>2,840</strong></div>
+              <div><span>OUTBOUND</span><strong>1,964</strong></div>
+            </div>
+
+            <div class="bar-chart">
+              <div class="bar-group"><i class="received" style="height:66px"></i><i class="dispatched" style="height:38px"></i><span>W1</span></div>
+              <div class="bar-group"><i class="received" style="height:84px"></i><i class="dispatched" style="height:50px"></i><span>W2</span></div>
+              <div class="bar-group"><i class="received" style="height:73px"></i><i class="dispatched" style="height:56px"></i><span>W3</span></div>
+              <div class="bar-group"><i class="received" style="height:101px"></i><i class="dispatched" style="height:62px"></i><span>W4</span></div>
+              <div class="bar-group"><i class="received" style="height:116px"></i><i class="dispatched" style="height:70px"></i><span>W5</span></div>
+              <div class="bar-group"><i class="received" style="height:120px"></i><i class="dispatched" style="height:76px"></i><span>W6</span></div>
+            </div>
+
+            <div class="chart-legend">
+              <span><i class="legend-received"></i>Received</span>
+              <span><i class="legend-dispatched"></i>Dispatched</span>
+            </div>
+          </article>
+
+          <article class="panel alerts-panel">
+            <div class="panel-header">
+              <div class="alert-heading">
+                <h2>Low-stock alerts <b>24</b></h2>
+                <p>Reorder points reached</p>
+              </div>
+              <a href="#">View all</a>
+            </div>
+
+            <div class="alert-list">
+              <div class="alert-item">
+                <div class="alert-icon red">◈</div>
+                <div><strong>Power adapter 65W</strong><small>PA-1180</small></div>
+                <b class="alert-number red-text">4 left</b>
+              </div>
+              <div class="alert-item">
+                <div class="alert-icon orange">◈</div>
+                <div><strong>USB-C cable · 2m</strong><small>UC-2084</small></div>
+                <b class="alert-number orange-text">11 left</b>
+              </div>
+              <div class="alert-item">
+                <div class="alert-icon orange">◈</div>
+                <div><strong>Sensor module</strong><small>SS-2041</small></div>
+                <b class="alert-number orange-text">18 left</b>
+              </div>
+            </div>
+
+            <button class="purchase-button">🛒&nbsp; Create purchase order</button>
+          </article>
+        </section>
+
+        <!-- Recent inventory -->
+        <section class="inventory-panel panel">
+          <div class="inventory-header">
+            <div class="inventory-title">
+              <h2>Recent inventory</h2>
+              <span>12,486 products</span>
+            </div>
+            <div class="inventory-tools">
+              <button class="small-button">☰&nbsp; Filter</button>
+              <button class="small-button">⇩&nbsp; Export</button>
+              <a href="#">View all inventory</a>
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>PRODUCT</th>
+                  <th>SKU</th>
+                  <th>CATEGORY</th>
+                  <th>STOCK</th>
+                  <th>VALUE</th>
+                  <th>STATUS</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>
+                    <div class="product">
+                      <div class="product-icon">◉</div>
+                      <div><strong>Wireless Sensor Module</strong><small>Vertex Industrial</small></div>
+                    </div>
+                  </td>
+                  <td>SS-2041</td>
+                  <td>Electronics</td>
+                  <td class="stock">842 units</td>
+                  <td class="value">$38,742</td>
+                  <td><span class="status in-stock">● &nbsp;In stock</span></td>
+                  <td>•••</td>
+                </tr>
+
+                <tr>
+                  <td>
+                    <div class="product">
+                      <div class="product-icon">↗</div>
+                      <div><strong>65W Power Adapter</strong><small>Aster Components</small></div>
+                    </div>
+                  </td>
+                  <td>PA-1180</td>
+                  <td>Accessories</td>
+                  <td class="stock">4 units</td>
+                  <td class="value">$312</td>
+                  <td><span class="status low-stock">● &nbsp;Low stock</span></td>
+                  <td>•••</td>
+                </tr>
+
+                <tr>
+                  <td>
+                    <div class="product">
+                      <div class="product-icon">⌘</div>
+                      <div><strong>Aluminum Mounting Kit</strong><small>North Forge Co.</small></div>
+                    </div>
+                  </td>
+                  <td>MK-0098</td>
+                  <td>Hardware</td>
+                  <td class="stock">1,204 units</td>
+                  <td class="value">$21,672</td>
+                  <td><span class="status in-stock">● &nbsp;In stock</span></td>
+                  <td>•••</td>
+                </tr>
+
+                <tr>
+                  <td>
+                    <div class="product">
+                      <div class="product-icon">⌗</div>
+                      <div><strong>USB-C Data Cable · 2m</strong><small>Circuit Supply</small></div>
+                    </div>
+                  </td>
+                  <td>UC-2084</td>
+                  <td>Cables</td>
+                  <td class="stock out">0 units</td>
+                  <td class="value">$0</td>
+                  <td><span class="status out-stock">● &nbsp;Out of stock</span></td>
+                  <td>•••</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="inventory-footer">
+            <span>Showing 1–4 of 12,486 products</span>
+            <div class="pagination">
+              <button>‹</button>
+              <button class="current">1</button>
+              <button>2</button>
+              <button>3</button>
+              <button>›</button>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartStock - <%= isViewOnly ? 'View Product' : 'Edit Product' %></title>
+  <link rel="stylesheet" href="/css/add-product.css">
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ================= SIDEBAR ================= -->
+  <aside class="sidebar">
+
+    <a href="/<%= User._id %>/dashboard" class="brand">
+      <span class="brand-mark">
+        <i></i><i></i><i></i>
+      </span>
+      <span>Smart<span>Stock</span></span>
+    </a>
+
+    <button class="workspace">
+      <span class="workspace-icon">▣</span>
+      <span class="workspace-text">
+        <strong>Northline Ops</strong>
+        <small>4 locations</small>
+      </span>
+      <span class="workspace-arrow">⌄</span>
+    </button>
+
+    <nav class="navigation">
+
+      <div class="nav-title">WORKSPACE</div>
+
+      <a href="/<%= User._id %>/dashboard" class="nav-item">
+        <span>▦</span>
+        Dashboard
+      </a>
+
+      <a href="/products/add" class="nav-item">
+        <span>⊕</span>
+        Add Product
+      </a>
+
+      <a href="/inventory" class="nav-item active">
+        <span>♧</span>
+        Inventory
+      </a>
+
+      <a href="/sales" class="nav-item">
+        <span>$</span>
+        Sales
+      </a>
+
+      <a href="/reports" class="nav-item">
+        <span>▥</span>
+        Reports
+      </a>
+
+      <div class="nav-title manage-title">MANAGE</div>
+
+      <a href="/suppliers" class="nav-item">
+        <span>▱</span>
+        Suppliers
+      </a>
+
+      <a href="/locations" class="nav-item">
+        <span>⌖</span>
+        Locations
+      </a>
+
+      <a href="/settings" class="nav-item">
+        <span>⚙</span>
+        Settings
+      </a>
+    </nav>
+
+    <div class="sidebar-bottom">
+
+      <div class="health-card">
+        <div class="health-top">
+          <span>Inventory health</span>
+          <strong>92%</strong>
+        </div>
+
+        <div class="health-bar">
+          <span></span>
+        </div>
+
+        <small>12,486 SKUs synced · 2m ago</small>
+      </div>
+
+      <a href="/<%= User._id %>/user/profile" class="user">
+        <div class="avatar">
+          <%= typeof reqUser !== 'undefined' && reqUser?.username
+              ? reqUser.username.substring(0, 2).toUpperCase()
+              : 'TM' %>
+        </div>
+
+        <div class="user-info">
+          <strong>
+            <%= typeof reqUser !== 'undefined' && reqUser?.username
+                ? reqUser.username
+                : 'Taylor Morgan' %>
+          </strong>
+          <small>Operations admin</small>
+        </div>
+
+        <span class="online"></span>
+      </a>
+
+    </div>
+  </aside>
+
+  <!-- ================= MAIN CONTENT ================= -->
+  <main class="main">
+
+    <!-- Top bar -->
+    <header class="topbar">
+      <div class="search">
+        <span class="search-icon">⌕</span>
+        <input
+          type="search"
+          placeholder="Search products, SKUs, suppliers..."
+        >
+        <kbd>⌘ K</kbd>
+      </div>
+
+      <div class="top-actions">
+        <div class="sync">
+          <i></i>
+          SYNCED NOW
+        </div>
+
+        <button class="circle-btn">?</button>
+
+        <button class="circle-btn notification">
+          ♧
+          <i></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <div class="content">
+
+      <!-- Breadcrumb -->
+      <div class="breadcrumb">
+        <a href="/<%= User._id %>/dashboard">Dashboard</a>
+        <span>›</span>
+        <a href="/inventory">Inventory</a>
+        <span>›</span>
+        <strong><%= isViewOnly ? 'Product Details' : 'Edit Product' %></strong>
+      </div>
+
+      <!-- Page title -->
+      <div class="page-title">
+        <div>
+          <h1><%= isViewOnly ? product.productName : 'Edit Product' %></h1>
+          <p><%= isViewOnly ? 'Review detailed product specifications and stock metrics.' : 'Update product details and stock settings.' %></p>
+        </div>
+
+        <a href="/inventory" class="back-btn">
+          ← Back to inventory
+        </a>
+      </div>
+
+      <!-- ================= PRODUCT FORM ================= -->
+      <form
+        action="/products/<%= product._id %>/edit"
+        method="POST"
+        class="product-form"
+      >
+
+        <!-- Product Information -->
+        <section class="form-card">
+
+          <div class="card-heading">
+            <div class="heading-icon green">▣</div>
+            <div>
+              <h2>Product information</h2>
+              <p>Basic details about the product.</p>
+            </div>
+          </div>
+
+          <div class="form-grid">
+
+            <div class="field field-full">
+              <label for="productName">
+                Product name <span>*</span>
+              </label>
+
+              <input
+                type="text"
+                id="productName"
+                name="productName"
+                value="<%= product.productName %>"
+                <%= isViewOnly ? 'readonly' : 'required' %>
+              >
+            </div>
+
+            <div class="field">
+              <label for="sku">
+                SKU <span>*</span>
+              </label>
+
+              <input
+                type="text"
+                id="sku"
+                name="sku"
+                value="<%= product.sku %>"
+                <%= isViewOnly ? 'readonly' : 'required' %>
+              >
+            </div>
+
+            <div class="field">
+              <label for="barcode">
+                Barcode
+              </label>
+
+              <input
+                type="text"
+                id="barcode"
+                name="barcode"
+                value="<%= product.barcode || '' %>"
+                <%= isViewOnly ? 'readonly' : '' %>
+              >
+            </div>
+
+            <div class="field">
+              <label for="categoryId">
+                Category <span>*</span>
+              </label>
+
+              <% if (isViewOnly) { %>
+                <input
+                  type="text"
+                  value="<%= product.categoryId?.name || product.category?.name || 'Uncategorized' %>"
+                  readonly
+                >
+              <% } else { %>
+                <select id="categoryId" name="categoryId" required>
+                  <% categories.forEach(function(cat) { %>
+                    <option
+                      value="<%= cat._id %>"
+                      <%= (product.categoryId?.toString() === cat._id.toString() || product.category?.toString() === cat._id.toString()) ? 'selected' : '' %>
+                    >
+                      <%= cat.name %>
+                    </option>
+                  <% }); %>
+                </select>
+              <% } %>
+            </div>
+
+            <div class="field">
+              <label for="supplier">
+                Supplier
+              </label>
+
+              <input
+                type="text"
+                id="supplier"
+                name="supplier"
+                value="<%= product.supplier || '' %>"
+                <%= isViewOnly ? 'readonly' : '' %>
+              >
+            </div>
+
+            <div class="field field-full">
+              <label for="description">
+                Description
+              </label>
+
+              <textarea
+                id="description"
+                name="description"
+                rows="4"
+                <%= isViewOnly ? 'readonly' : '' %>
+              ><%= product.description || '' %></textarea>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- Inventory -->
+        <section class="form-card">
+
+          <div class="card-heading">
+            <div class="heading-icon blue">♧</div>
+            <div>
+              <h2>Inventory</h2>
+              <p>Stock quantity and unit measurements.</p>
+            </div>
+          </div>
+
+          <div class="form-grid three">
+
+            <div class="field">
+              <label for="unitId">
+                Unit <span>*</span>
+              </label>
+
+              <% if (isViewOnly) { %>
+                <input
+                  type="text"
+                  value="<%= product.unitId?.name ? `${product.unitId.name} (${product.unitId.symbol})` : 'Piece' %>"
+                  readonly
+                >
+              <% } else { %>
+                <select id="unitId" name="unitId" required>
+                  <% units.forEach(function(u) { %>
+                    <option
+                      value="<%= u._id %>"
+                      <%= (product.unitId?.toString() === u._id.toString() || product.unit?.toString() === u._id.toString()) ? 'selected' : '' %>
+                    >
+                      <%= u.name %> (<%= u.symbol %>)
+                    </option>
+                  <% }); %>
+                </select>
+              <% } %>
+            </div>
+
+            <div class="field">
+              <label for="quantity">
+                Stock Quantity
+              </label>
+
+              <input
+                type="number"
+                id="quantity"
+                name="quantity"
+                min="0"
+                value="<%= product.quantity %>"
+                <%= isViewOnly ? 'readonly' : '' %>
+              >
+            </div>
+
+            <div class="field">
+              <label for="minimumStock">
+                Reorder / Min Stock
+              </label>
+
+              <input
+                type="number"
+                id="minimumStock"
+                name="minimumStock"
+                min="0"
+                value="<%= product.minimumStock || 5 %>"
+                <%= isViewOnly ? 'readonly' : '' %>
+              >
+            </div>
+
+          </div>
+        </section>
+
+        <!-- Pricing -->
+        <section class="form-card">
+
+          <div class="card-heading">
+            <div class="heading-icon orange">$</div>
+            <div>
+              <h2>Pricing</h2>
+              <p>Purchase, selling and tax details.</p>
+            </div>
+          </div>
+
+          <div class="form-grid three">
+
+            <div class="field">
+              <label for="purchasePrice">
+                Cost price
+              </label>
+
+              <div class="money-input">
+                <span>₹</span>
+                <input
+                  type="number"
+                  id="purchasePrice"
+                  name="purchasePrice"
+                  min="0"
+                  step="0.01"
+                  value="<%= product.purchasePrice || 0 %>"
+                  <%= isViewOnly ? 'readonly' : '' %>
+                >
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="sellingPrice">
+                Selling price <span>*</span>
+              </label>
+
+              <div class="money-input">
+                <span>₹</span>
+                <input
+                  type="number"
+                  id="sellingPrice"
+                  name="sellingPrice"
+                  min="0"
+                  step="0.01"
+                  value="<%= product.sellingPrice || product.price || 0 %>"
+                  <%= isViewOnly ? 'readonly' : 'required' %>
+                >
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="gst">
+                Tax / GST
+              </label>
+
+              <div class="suffix-input">
+                <input
+                  type="number"
+                  id="gst"
+                  name="gst"
+                  min="0"
+                  max="100"
+                  step="0.01"
+                  value="<%= product.gst || 0 %>"
+                  <%= isViewOnly ? 'readonly' : '' %>
+                >
+                <span>%</span>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- Form actions -->
+        <div class="form-actions">
+          <a href="/inventory" class="cancel-btn">
+            Cancel
+          </a>
+
+          <% if (!isViewOnly) { %>
+            <button type="submit" class="save-btn">
+              <span>✓</span>
+              Update Product
+            </button>
+          <% } else { %>
+            <a href="/products/<%= product._id %>/edit" class="save-btn">
+              Edit Product
+            </a>
+          <% } %>
+        </div>
+
+      </form>
+
+    </div>
+  </main>
+
+</div>
+
+</body>
+</html>
+

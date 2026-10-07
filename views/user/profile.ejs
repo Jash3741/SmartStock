@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartStock - Profile</title>
+  <link rel="stylesheet" href="/css/profile.css">
+</head>
+<body>
+  <div class="profile-page">
+
+    <!-- LEFT NAVIGATION -->
+    <aside class="profile-sidebar">
+      <div class="sidebar-brand">
+        <a href="/" class="brand-name">Smart<span>Stock</span></a>
+        <p>Manage your account from one<br>place.</p>
+      </div>
+
+      <nav class="account-nav">
+        <a href="/profile" class="nav-item active">
+          <span class="nav-icon">♙</span>
+          <span>Profile</span>
+        </a>
+
+        <a href="/security" class="nav-item">
+          <span class="nav-icon">♢</span>
+          <span>Security</span>
+        </a>
+
+        <a href="/notifications" class="nav-item">
+          <span class="nav-icon">♧</span>
+          <span>Notifications</span>
+        </a>
+      </nav>
+
+      <div class="account-status">
+        <h3>Account status</h3>
+        <p>Your profile is complete and ready<br>for use across the site.</p>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="profile-main">
+      <header class="page-header">
+        <h1>Profile</h1>
+        <p>A little about you. All in one place.</p>
+      </header>
+
+      <div class="profile-grid">
+
+        <!-- PROFILE CARD -->
+        <section class="profile-card">
+          <div class="profile-summary">
+            <img src="/images/profile-avatar.jpg" alt="Alex Morgan" class="avatar">
+            <div class="identity">
+              <h2>Alex Morgan</h2>
+              <p>Member since June 2024</p>
+              <span class="verified">
+                <b>✓</b>
+                Verified account
+              </span>
+            </div>
+          </div>
+
+          <button class="edit-profile" type="button" onclick="openEditProfile()">
+            <span>♢</span>
+            Edit profile
+          </button>
+
+          <div class="section-label">PERSONAL INFORMATION</div>
+
+          <div class="personal-info">
+            <div class="info-row">
+              <span class="info-label">Email address</span>
+              <strong>alex.morgan@gmail.com</strong>
+            </div>
+
+            <div class="info-row">
+              <span class="info-label">Phone number</span>
+              <strong>+1 (415) 555-0128</strong>
+            </div>
+
+            <div class="info-row">
+              <span class="info-label">Location</span>
+              <strong>San Francisco, California</strong>
+            </div>
+          </div>
+        </section>
+
+        <!-- ACCOUNT CARD -->
+        <section class="account-card">
+          <div class="section-label account-label">ACCOUNT</div>
+
+          <div class="account-links">
+            <a href="/security" class="account-link">
+              <span class="account-link-icon">♢</span>
+              <span class="account-copy">
+                <strong>Password &amp; security</strong>
+                <small>Keep your account protected</small>
+              </span>
+              <span class="account-arrow">›</span>
+            </a>
+
+            <a href="/notifications" class="account-link">
+              <span class="account-link-icon">♧</span>
+              <span class="account-copy">
+                <strong>Notifications</strong>
+                <small>Choose what you hear from us</small>
+              </span>
+              <span class="account-arrow">›</span>
+            </a>
+          </div>
+
+          <div class="account-divider"></div>
+
+          <form action="/api/auth/logout" method="POST">
+            <button type="submit" class="logout-button">
+              <span>↪</span>
+              Log out
+            </button>
+          </form>
+
+          <p class="logout-note">Your information stays safe when you log out.</p>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Simple edit modal -->
+  <div class="modal" id="editModal" aria-hidden="true">
+    <div class="modal-backdrop" onclick="closeEditProfile()"></div>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="editTitle">
+      <div class="modal-header">
+        <div>
+          <h2 id="editTitle">Edit profile</h2>
+          <p>Update your personal information.</p>
+        </div>
+        <button type="button" class="modal-close" onclick="closeEditProfile()">×</button>
+      </div>
+
+      <form action="/profile" method="POST" class="edit-form">
+        <label>
+          Full name
+          <input type="text" name="name" value="Alex Morgan" required>
+        </label>
+
+        <label>
+          Email address
+          <input type="email" name="email" value="alex.morgan@gmail.com" required>
+        </label>
+
+        <label>
+          Phone number
+          <input type="tel" name="phone" value="+1 (415) 555-0128">
+        </label>
+
+        <label>
+          Location
+          <input type="text" name="location" value="San Francisco, California">
+        </label>
+
+        <div class="modal-actions">
+          <button type="button" class="cancel-button" onclick="closeEditProfile()">Cancel</button>
+          <button type="submit" class="save-button">Save changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    function openEditProfile() {
+      const modal = document.getElementById("editModal");
+      modal.classList.add("show");
+      modal.setAttribute("aria-hidden", "false");
+      document.body.classList.add("modal-open");
+    }
+
+    function closeEditProfile() {
+      const modal = document.getElementById("editModal");
+      modal.classList.remove("show");
+      modal.setAttribute("aria-hidden", "true");
+      document.body.classList.remove("modal-open");
+    }
+
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape") {
+        closeEditProfile();
+      }
+    });
+  </script>
+</body>
+</html>

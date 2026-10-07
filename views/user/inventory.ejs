@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartStock - Inventory</title>
+  <link rel="stylesheet" href="/css/inventory.css">
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ================= SIDEBAR ================= -->
+  <aside class="sidebar">
+
+    <a href="/<%= User._id %>/dashboard" class="brand">
+      <span class="brand-mark">
+        <i></i><i></i><i></i>
+      </span>
+      <span>Smart<span>Stock</span></span>
+    </a>
+
+    <button class="workspace">
+      <span class="workspace-icon">▣</span>
+      <span class="workspace-text">
+        <strong>Northline Ops</strong>
+        <small>4 locations</small>
+      </span>
+      <span class="workspace-arrow">⌄</span>
+    </button>
+
+    <nav class="navigation">
+
+      <div class="nav-title">WORKSPACE</div>
+
+      <a href="/<%= User._id %>/dashboard" class="nav-item">
+        <span>▦</span>
+        Dashboard
+      </a>
+
+      <a href="/products/add" class="nav-item">
+        <span>⊕</span>
+        Add Product
+      </a>
+
+      <a href="/inventory" class="nav-item active">
+        <span>♧</span>
+        Inventory
+        <b><%= stats.totalProducts %></b>
+      </a>
+
+      <a href="/sales" class="nav-item">
+        <span>$</span>
+        Sales
+      </a>
+
+      <a href="/reports" class="nav-item">
+        <span>▥</span>
+        Reports
+      </a>
+
+      <div class="nav-title manage-title">MANAGE</div>
+
+      <a href="/suppliers" class="nav-item">
+        <span>▱</span>
+        Suppliers
+      </a>
+
+      <a href="/locations" class="nav-item">
+        <span>⌖</span>
+        Locations
+      </a>
+
+      <a href="/settings" class="nav-item">
+        <span>⚙</span>
+        Settings
+      </a>
+    </nav>
+
+    <div class="sidebar-bottom">
+
+      <div class="health-card">
+        <div class="health-top">
+          <span>Inventory health</span>
+          <strong>92%</strong>
+        </div>
+
+        <div class="health-bar">
+          <span></span>
+        </div>
+
+        <small>12,486 SKUs synced · 2m ago</small>
+      </div>
+
+      <a href="/<%= User._id %>/user/profile" class="user">
+        <div class="avatar">
+          <%= typeof reqUser !== 'undefined' && reqUser?.username
+              ? reqUser.username.substring(0, 2).toUpperCase()
+              : 'TM' %>
+        </div>
+
+        <div class="user-info">
+          <strong>
+            <%= typeof reqUser !== 'undefined' && reqUser?.username
+                ? reqUser.username
+                : 'Taylor Morgan' %>
+          </strong>
+          <small>Operations admin</small>
+        </div>
+
+        <span class="online"></span>
+      </a>
+
+    </div>
+  </aside>
+
+  <!-- ================= MAIN CONTENT ================= -->
+  <main class="main">
+
+    <!-- Top bar -->
+    <header class="topbar">
+      <div class="search">
+        <span class="search-icon">⌕</span>
+        <input
+          type="search"
+          placeholder="Search products, SKUs, suppliers..."
+          id="globalSearchInput"
+        >
+        <kbd>⌘ K</kbd>
+      </div>
+
+      <div class="top-actions">
+        <div class="sync">
+          <i></i>
+          SYNCED NOW
+        </div>
+
+        <button class="circle-btn" title="Help">?</button>
+
+        <button class="circle-btn notification" title="Notifications">
+          ♧
+        </button>
+      </div>
+    </header>
+
+    <!-- Content Area -->
+    <div class="content">
+
+      <!-- Breadcrumb -->
+      <div class="breadcrumb">
+        <a href="/<%= User._id %>/dashboard">Dashboard</a>
+        <span>›</span>
+        <strong>Inventory</strong>
+      </div>
+
+      <!-- Header & Action -->
+      <div class="page-title">
+        <div>
+          <h1>Inventory</h1>
+          <p>Manage your products and stock</p>
+        </div>
+
+        <a href="/products/add" class="primary-add-btn">
+          <span>+</span> Add Product
+        </a>
+      </div>
+
+      <!-- Inventory Statistics (4 Cards) -->
+      <section class="stats-grid">
+        <!-- Total Products -->
+        <div class="stat-card">
+          <div class="stat-icon total-prod">▦</div>
+          <div class="stat-details">
+            <span class="stat-label">Total Products</span>
+            <span class="stat-value"><%= stats.totalProducts.toLocaleString() %></span>
+          </div>
+        </div>
+
+        <!-- Total Stock -->
+        <div class="stat-card">
+          <div class="stat-icon total-stock">♧</div>
+          <div class="stat-details">
+            <span class="stat-label">Total Stock</span>
+            <span class="stat-value"><%= stats.totalStock.toLocaleString() %></span>
+          </div>
+        </div>
+
+        <!-- Low Stock -->
+        <div class="stat-card">
+          <div class="stat-icon low-stock">⚠</div>
+          <div class="stat-details">
+            <span class="stat-label">Low Stock</span>
+            <span class="stat-value"><%= stats.lowStock.toLocaleString() %></span>
+          </div>
+        </div>
+
+        <!-- Out of Stock -->
+        <div class="stat-card">
+          <div class="stat-icon out-stock">✕</div>
+          <div class="stat-details">
+            <span class="stat-label">Out of Stock</span>
+            <span class="stat-value"><%= stats.outOfStock.toLocaleString() %></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Toolbar: Search, Filters, Sorting, Page Size -->
+      <section class="inventory-toolbar-card">
+        <form id="filterForm" method="GET" action="/inventory" class="toolbar-form">
+          <input type="hidden" name="page" value="1" id="pageHiddenInput">
+
+          <div class="toolbar-left">
+            <!-- Search products input -->
+            <div class="table-search-box">
+              <span class="search-icon">⌕</span>
+              <input
+                type="text"
+                name="search"
+                id="searchInput"
+                placeholder="Search products..."
+                value="<%= filters.search %>"
+              >
+            </div>
+
+            <!-- Category Filter -->
+            <select name="category" id="categoryFilter" class="toolbar-select">
+              <option value="all">All Categories ▼</option>
+              <% categories.forEach(function(cat) { %>
+                <option
+                  value="<%= cat._id %>"
+                  <%= filters.category === cat._id.toString() || filters.category === cat.name ? 'selected' : '' %>
+                >
+                  <%= cat.name %>
+                </option>
+              <% }); %>
+            </select>
+
+            <!-- Stock Filter -->
+            <select name="stock" id="stockFilter" class="toolbar-select">
+              <option value="all" <%= filters.stock === 'all' || !filters.stock ? 'selected' : '' %>>All Stock</option>
+              <option value="in_stock" <%= filters.stock === 'in_stock' ? 'selected' : '' %>>In Stock</option>
+              <option value="low_stock" <%= filters.stock === 'low_stock' ? 'selected' : '' %>>Low Stock</option>
+              <option value="out_of_stock" <%= filters.stock === 'out_of_stock' ? 'selected' : '' %>>Out of Stock</option>
+            </select>
+          </div>
+
+          <div class="toolbar-right">
+            <!-- Sorting -->
+            <select name="sort" id="sortFilter" class="toolbar-select">
+              <option value="newest" <%= filters.sort === 'newest' ? 'selected' : '' %>>Newest</option>
+              <option value="oldest" <%= filters.sort === 'oldest' ? 'selected' : '' %>>Oldest</option>
+              <option value="name_asc" <%= filters.sort === 'name_asc' ? 'selected' : '' %>>Product Name A-Z</option>
+              <option value="name_desc" <%= filters.sort === 'name_desc' ? 'selected' : '' %>>Product Name Z-A</option>
+              <option value="price_asc" <%= filters.sort === 'price_asc' ? 'selected' : '' %>>Price Low-High</option>
+              <option value="price_desc" <%= filters.sort === 'price_desc' ? 'selected' : '' %>>Price High-Low</option>
+              <option value="quantity_asc" <%= filters.sort === 'quantity_asc' ? 'selected' : '' %>>Quantity Low-High</option>
+              <option value="quantity_desc" <%= filters.sort === 'quantity_desc' ? 'selected' : '' %>>Quantity High-Low</option>
+            </select>
+
+            <!-- Products per page (limit) -->
+            <select name="limit" id="limitFilter" class="toolbar-select">
+              <option value="10" <%= pagination.limit === 10 ? 'selected' : '' %>>10 per page</option>
+              <option value="25" <%= pagination.limit === 25 ? 'selected' : '' %>>25 per page</option>
+              <option value="50" <%= pagination.limit === 50 ? 'selected' : '' %>>50 per page</option>
+              <option value="100" <%= pagination.limit === 100 ? 'selected' : '' %>>100 per page</option>
+            </select>
+
+            <% if (filters.search || (filters.category && filters.category !== 'all') || (filters.stock && filters.stock !== 'all') || filters.sort !== 'newest') { %>
+              <a href="/inventory" class="clear-filters-btn" title="Reset all filters">
+                ✕ Reset
+              </a>
+            <% } %>
+          </div>
+        </form>
+      </section>
+
+      <!-- Product Table Card -->
+      <section class="table-card">
+        <% if (products && products.length > 0) { %>
+          <div class="table-responsive">
+            <table class="inventory-table">
+              <thead>
+                <tr>
+                  <th style="width: 45px;">#</th>
+                  <th>Product</th>
+                  <th>Category</th>
+                  <th>Price</th>
+                  <th>Quantity</th>
+                  <th>Unit</th>
+                  <th>Stock Status</th>
+                  <th style="text-align: right; width: 175px;">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% products.forEach(function(product, index) { %>
+                  <% 
+                    const rowIndex = pagination.startItem + index;
+                    const catName = product.categoryId?.name || product.category?.name || 'Uncategorized';
+                    const unitSymbol = product.unitId?.symbol || product.unit?.symbol || product.unitId?.name || product.unit?.name || 'pcs';
+                    const qty = Number(product.quantity || 0);
+                    
+                    let statusLabel = 'In Stock';
+                    let statusClass = 'in-stock';
+                    if (qty <= 0) {
+                      statusLabel = 'Out of Stock';
+                      statusClass = 'out-of-stock';
+                    } else if (qty <= 5) {
+                      statusLabel = 'Low Stock';
+                      statusClass = 'low-stock';
+                    }
+                  %>
+                  <tr id="row-<%= product._id %>">
+                    <td class="row-index"><%= rowIndex %></td>
+                    <td class="product-meta-cell">
+                      <strong><%= product.productName %></strong>
+                      <small>SKU: <%= product.sku %></small>
+                    </td>
+                    <td>
+                      <span class="badge-category"><%= catName %></span>
+                    </td>
+                    <td class="price-text">
+                      ₹<%= Number(product.sellingPrice || product.price || 0).toLocaleString() %>
+                    </td>
+                    <td class="quantity-text">
+                      <%= qty %>
+                    </td>
+                    <td class="unit-text">
+                      <%= unitSymbol %>
+                    </td>
+                    <td>
+                      <span class="stock-badge <%= statusClass %>">
+                        <i></i>
+                        <%= statusLabel %>
+                      </span>
+                    </td>
+                    <td style="text-align: right;">
+                      <div class="action-buttons" style="justify-content: flex-end;">
+                        <!-- View button (Opens modal or details) -->
+                        <button
+                          type="button"
+                          class="btn-action view"
+                          onclick="viewProductDetails('<%= product._id %>')"
+                          title="View Product"
+                        >
+                          View
+                        </button>
+
+                        <!-- Edit button -->
+                        <a
+                          href="/products/<%= product._id %>/edit"
+                          class="btn-action edit"
+                          title="Edit Product"
+                        >
+                          Edit
+                        </a>
+
+                        <!-- Delete button (with confirmation) -->
+                        <button
+                          type="button"
+                          class="btn-action delete"
+                          onclick="promptDeleteProduct('<%= product._id %>', '<%= product.productName.replace(/'/g, '\\\'') %>')"
+                          title="Delete Product"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                <% }); %>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination Controls -->
+          <div class="pagination-container">
+            <div class="pagination-info">
+              Showing <%= pagination.startItem %>–<%= pagination.endItem %> of <%= pagination.totalProducts %> products
+            </div>
+
+            <div class="pagination-controls">
+              <!-- Previous Button -->
+              <a
+                href="<%= pagination.page > 1 ? buildPaginationUrl(pagination.page - 1) : '#' %>"
+                class="page-btn <%= pagination.page <= 1 ? 'disabled' : '' %>"
+                aria-label="Previous page"
+              >
+                ‹ Previous
+              </a>
+
+              <!-- Page Number Buttons -->
+              <% 
+                const totalP = pagination.totalPages;
+                const currP = pagination.page;
+                let startP = Math.max(1, currP - 2);
+                let endP = Math.min(totalP, currP + 2);
+
+                if (startP > 1) { %>
+                  <a href="<%= buildPaginationUrl(1) %>" class="page-btn">1</a>
+                  <% if (startP > 2) { %>
+                    <span style="padding: 0 4px; color: #8a9cb0;">…</span>
+                  <% } %>
+              <% } %>
+
+              <% for (let p = startP; p <= endP; p++) { %>
+                <a
+                  href="<%= buildPaginationUrl(p) %>"
+                  class="page-btn <%= p === currP ? 'active' : '' %>"
+                >
+                  <%= p %>
+                </a>
+              <% } %>
+
+              <% if (endP < totalP) { %>
+                <% if (endP < totalP - 1) { %>
+                  <span style="padding: 0 4px; color: #8a9cb0;">…</span>
+                <% } %>
+                <a href="<%= buildPaginationUrl(totalP) %>" class="page-btn"><%= totalP %></a>
+              <% } %>
+
+              <!-- Next Button -->
+              <a
+                href="<%= pagination.page < pagination.totalPages ? buildPaginationUrl(pagination.page + 1) : '#' %>"
+                class="page-btn <%= pagination.page >= pagination.totalPages ? 'disabled' : '' %>"
+                aria-label="Next page"
+              >
+                Next ›
+              </a>
+            </div>
+          </div>
+
+        <% } else { %>
+          <!-- Empty State -->
+          <div class="empty-state">
+            <div class="empty-icon">♧</div>
+            <% if (filters.search || (filters.category && filters.category !== 'all') || (filters.stock && filters.stock !== 'all')) { %>
+              <h3>No products match your search or filters.</h3>
+              <p>Try adjusting your search criteria or resetting filters to find what you're looking for.</p>
+              <a href="/inventory" class="clear-filters-btn">
+                Clear Filters
+              </a>
+            <% } else { %>
+              <h3>No products found</h3>
+              <p>Start adding products to manage your inventory.</p>
+              <a href="/products/add" class="primary-add-btn">
+                <span>+</span> Add Product
+              </a>
+            <% } %>
+          </div>
+        <% } %>
+      </section>
+
+    </div>
+  </main>
+
+</div>
+
+<!-- ================= DELETE CONFIRMATION MODAL ================= -->
+<div class="modal-overlay" id="deleteConfirmModal" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3 id="deleteModalTitle" class="danger">
+        <span>⚠</span> Delete Product
+      </h3>
+      <button type="button" class="modal-close-btn" onclick="closeDeleteModal()">&times;</button>
+    </div>
+
+    <div class="modal-body">
+      <p>Are you sure you want to delete <strong id="deleteTargetName">this product</strong>?</p>
+      <p style="margin-top: 6px; color: #dc2626; font-size: 12px; font-weight: 500;">
+        This action cannot be undone.
+      </p>
+    </div>
+
+    <div class="modal-footer">
+      <button type="button" class="cancel-modal-btn" onclick="closeDeleteModal()">
+        Cancel
+      </button>
+      <button type="button" class="danger-modal-btn" id="confirmDeleteBtn" onclick="executeDelete()">
+        <span>✓</span> Yes, Delete
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= VIEW PRODUCT DETAILS MODAL ================= -->
+<div class="modal-overlay" id="viewProductModal" role="dialog" aria-modal="true" aria-labelledby="viewModalTitle">
+  <div class="modal-card" style="width: min(540px, 100%);">
+    <div class="modal-header">
+      <h3 id="viewModalTitle">
+        <span>▣</span> Product Details
+      </h3>
+      <button type="button" class="modal-close-btn" onclick="closeViewModal()">&times;</button>
+    </div>
+
+    <div class="modal-body" id="viewModalContent">
+      <div style="text-align: center; padding: 20px; color: #8799ad;">
+        Loading product details...
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <a href="#" id="viewEditDirectBtn" class="btn-action edit" style="height: 36px; padding: 0 14px;">
+        Edit Product
+      </a>
+      <button type="button" class="cancel-modal-btn" onclick="closeViewModal()">
+        Close
+      </button>
+    </div>
+  </div>
+</div>
+
+<%
+  // Helper to build pagination links preserving filters
+  function buildPaginationUrl(targetPage) {
+    const params = [];
+    params.push('page=' + targetPage);
+    if (pagination.limit) params.push('limit=' + pagination.limit);
+    if (filters.search) params.push('search=' + encodeURIComponent(filters.search));
+    if (filters.category && filters.category !== 'all') params.push('category=' + encodeURIComponent(filters.category));
+    if (filters.stock && filters.stock !== 'all') params.push('stock=' + encodeURIComponent(filters.stock));
+    if (filters.sort && filters.sort !== 'newest') params.push('sort=' + encodeURIComponent(filters.sort));
+    return '/inventory?' + params.join('&');
+  }
+%>
+
+<script>
+  // DOM Elements
+  const filterForm = document.getElementById("filterForm");
+  const searchInput = document.getElementById("searchInput");
+  const categoryFilter = document.getElementById("categoryFilter");
+  const stockFilter = document.getElementById("stockFilter");
+  const sortFilter = document.getElementById("sortFilter");
+  const limitFilter = document.getElementById("limitFilter");
+  const pageHiddenInput = document.getElementById("pageHiddenInput");
+
+  // Auto-submit filter on dropdown change
+  [categoryFilter, stockFilter, sortFilter, limitFilter].forEach(el => {
+    if (el) {
+      el.addEventListener("change", () => {
+        pageHiddenInput.value = "1";
+        filterForm.submit();
+      });
+    }
+  });
+
+  // Debounced search input submission
+  let searchTimer;
+  searchInput.addEventListener("input", () => {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => {
+      pageHiddenInput.value = "1";
+      filterForm.submit();
+    }, 450);
+  });
+
+  // Global search keyboard shortcut (⌘ K / Ctrl+K)
+  window.addEventListener("keydown", (e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+      e.preventDefault();
+      searchInput.focus();
+    }
+  });
+
+  // Delete Confirmation Logic
+  let pendingDeleteId = null;
+  const deleteModal = document.getElementById("deleteConfirmModal");
+  const deleteTargetName = document.getElementById("deleteTargetName");
+  const confirmDeleteBtn = document.getElementById("confirmDeleteBtn");
+
+  function promptDeleteProduct(id, name) {
+    pendingDeleteId = id;
+    deleteTargetName.textContent = '"' + name + '"';
+    deleteModal.classList.add("active");
+  }
+
+  function closeDeleteModal() {
+    deleteModal.classList.remove("active");
+    pendingDeleteId = null;
+  }
+
+  async function executeDelete() {
+    if (!pendingDeleteId) return;
+
+    confirmDeleteBtn.disabled = true;
+    confirmDeleteBtn.textContent = "Deleting...";
+
+    try {
+      const response = await fetch(`/products/${pendingDeleteId}`, {
+        method: "DELETE",
+        headers: {
+          "Accept": "application/json"
+        }
+      });
+
+      const resData = await response.json();
+      if (!response.ok) {
+        throw new Error(resData.message || "Failed to delete product");
+      }
+
+      // Close modal & reload page to update table & statistics
+      closeDeleteModal();
+      window.location.reload();
+    } catch (err) {
+      alert("Error deleting product: " + err.message);
+      confirmDeleteBtn.disabled = false;
+      confirmDeleteBtn.textContent = "Yes, Delete";
+    }
+  }
+
+  // View Product Details Modal Logic
+  const viewModal = document.getElementById("viewProductModal");
+  const viewModalContent = document.getElementById("viewModalContent");
+  const viewEditDirectBtn = document.getElementById("viewEditDirectBtn");
+
+  async function viewProductDetails(id) {
+    viewModal.classList.add("active");
+    viewModalContent.innerHTML = '<div style="text-align: center; padding: 20px; color: #8799ad;">Loading product details...</div>';
+    viewEditDirectBtn.href = `/products/${id}/edit`;
+
+    try {
+      const response = await fetch(`/products/${id}`, {
+        headers: { "Accept": "application/json" }
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to load product details");
+      }
+
+      const p = data.product;
+      const catName = p.categoryId?.name || p.category?.name || "Uncategorized";
+      const unitName = p.unitId?.name 
+        ? `${p.unitId.name} (${p.unitId.symbol})` 
+        : (p.unit?.name ? `${p.unit.name} (${p.unit.symbol})` : "Piece");
+
+      const qty = p.quantity || 0;
+      let statusBadge = `<span class="stock-badge in-stock"><i></i> In Stock</span>`;
+      if (qty <= 0) {
+        statusBadge = `<span class="stock-badge out-of-stock"><i></i> Out of Stock</span>`;
+      } else if (qty <= 5) {
+        statusBadge = `<span class="stock-badge low-stock"><i></i> Low Stock</span>`;
+      }
+
+      viewModalContent.innerHTML = `
+        <div class="product-details-grid">
+          <div class="detail-item full">
+            <span class="detail-label">Product Name</span>
+            <span class="detail-value" style="font-size: 15px; font-weight: 700; color: #17243a;">${p.productName}</span>
+          </div>
+
+          <div class="detail-item">
+            <span class="detail-label">SKU</span>
+            <span class="detail-value">${p.sku}</span>
+          </div>
+
+          <div class="detail-item">
+            <span class="detail-label">Barcode</span>
+            <span class="detail-value">${p.barcode || "—"}</span>
+          </div>
+
+          <div class="detail-item">
+            <span class="detail-label">Category</span>
+            <span class="detail-value">${catName}</span>
+          </div>
+
+          <div class="detail-item">
+            <span class="detail-label">Unit</span>
+            <span class="detail-value">${unitName}</span>
+          </div>
+
+          <div class="detail-item">
+            <span class="detail-label">Selling Price</span>
+            <span class="detail-value" style="color: #17243a; font-weight: 600;">₹${Number(p.sellingPrice || p.price || 0).toLocaleString()}</span>
+          </div>
+
+          <div class="detail-item">
+            <span class="detail-label">Cost / Purchase Price</span>
+            <span class="detail-value">₹${Number(p.purchasePrice || 0).toLocaleString()}</span>
+          </div>
+
+          <div class="detail-item">
+            <span class="detail-label">Quantity in Stock</span>
+            <span class="detail-value" style="font-size: 14px; font-weight: 700;">${qty}</span>
+          </div>
+
+          <div class="detail-item">
+            <span class="detail-label">Stock Status</span>
+            <span class="detail-value">${statusBadge}</span>
+          </div>
+
+          <div class="detail-item">
+            <span class="detail-label">Supplier</span>
+            <span class="detail-value">${p.supplier || "—"}</span>
+          </div>
+
+          <div class="detail-item">
+            <span class="detail-label">Tax / GST</span>
+            <span class="detail-value">${p.gst || 0}%</span>
+          </div>
+
+          ${p.description ? `
+            <div class="detail-item full" style="margin-top: 6px;">
+              <span class="detail-label">Description</span>
+              <span class="detail-value" style="color: #4b6078; font-size: 12px; line-height: 1.4;">${p.description}</span>
+            </div>
+          ` : ""}
+        </div>
+      `;
+    } catch (err) {
+      viewModalContent.innerHTML = `<div style="color: #dc2626; text-align: center; padding: 20px;">${err.message}</div>`;
+    }
+  }
+
+  function closeViewModal() {
+    viewModal.classList.remove("active");
+  }
+
+  // Close modals on clicking backdrop
+  deleteModal.addEventListener("click", (e) => {
+    if (e.target === deleteModal) closeDeleteModal();
+  });
+
+  viewModal.addEventListener("click", (e) => {
+    if (e.target === viewModal) closeViewModal();
+  });
+
+  // Close modals on Escape key
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      closeDeleteModal();
+      closeViewModal();
+    }
+  });
+</script>
+
+</body>
+</html>
+

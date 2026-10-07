@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartStock — Create Account</title>
+  <link rel="stylesheet" href="./css/signup.css">
+</head>
+<body>
+  <main class="signup-page">
+
+    <!-- ================= LEFT BRAND PANEL ================= -->
+    <section class="brand-panel">
+      <div class="glow glow-top"></div>
+      <div class="glow glow-bottom"></div>
+
+      <div class="brand-content">
+        <a href="/" class="brand-logo">
+          <span class="logo-mark">
+            <i></i><i></i><i></i>
+          </span>
+          <span>Smart<span>Stock</span></span>
+        </a>
+
+        <div class="hero">
+          <div class="eyebrow">
+            <span>✣</span>
+            INVENTORY INTELLIGENCE, SIMPLIFIED
+          </div>
+
+          <h1>
+            Know what’s in stock.<br>
+            <span>Before it matters.</span>
+          </h1>
+
+          <p>
+            Turn live inventory data into confident purchasing decisions across
+            every location, supplier, and SKU.
+          </p>
+        </div>
+
+        <!-- Product dashboard preview -->
+        <div class="preview-card">
+
+          <div class="preview-top">
+            <div class="preview-brand">
+              <div class="preview-icon">▣</div>
+              <div>
+                <strong>Northline Operations</strong>
+                <small>Live inventory overview</small>
+              </div>
+            </div>
+
+            <div class="sync">
+              <i></i> SYNCED NOW
+            </div>
+          </div>
+
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-head">
+                <div class="stat-icon green">◉</div>
+                <span>+8.2%</span>
+              </div>
+              <strong>$284.6k</strong>
+              <small>Inventory value</small>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-head">
+                <div class="stat-icon blue">♣</div>
+                <span>+4.6%</span>
+              </div>
+              <strong>18,429</strong>
+              <small>Units in stock</small>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-head">
+                <div class="stat-icon orange">△</div>
+                <span class="action">Action</span>
+              </div>
+              <strong>24</strong>
+              <small>Reorder alerts</small>
+            </div>
+          </div>
+
+          <div class="preview-bottom">
+
+            <div class="movement-card">
+              <div class="preview-section-head">
+                <div>
+                  <strong>Stock movement</strong>
+                  <small>Units received, last 12 weeks</small>
+                </div>
+                <span>12W⌄</span>
+              </div>
+
+              <div class="mini-chart">
+                <i class="bar h1"></i>
+                <i class="bar h2"></i>
+                <i class="bar h3"></i>
+                <i class="bar h4"></i>
+                <i class="bar h5"></i>
+                <i class="bar h6"></i>
+                <i class="bar h7"></i>
+                <i class="bar h8"></i>
+                <i class="bar green h9"></i>
+                <i class="bar green h10"></i>
+                <i class="bar green h11"></i>
+                <i class="bar green h12"></i>
+              </div>
+
+              <div class="chart-labels">
+                <span>JUL</span>
+                <span>SEP</span>
+              </div>
+            </div>
+
+            <div class="priority-card">
+              <div class="preview-section-head">
+                <strong>Priority inventory</strong>
+                <a href="#">View all</a>
+              </div>
+
+              <div class="priority-row">
+                <div class="priority-icon">◇</div>
+                <div class="priority-copy">
+                  <strong>Sensor module</strong>
+                  <small>SS-2041 · 842 units</small>
+                </div>
+                <span class="status healthy">Healthy</span>
+              </div>
+
+              <div class="priority-row">
+                <div class="priority-icon">◇</div>
+                <div class="priority-copy">
+                  <strong>Power adapter</strong>
+                  <small>PA-1180 · 73 units</small>
+                </div>
+                <span class="status low">Low</span>
+              </div>
+
+              <div class="priority-row">
+                <div class="priority-icon">◇</div>
+                <div class="priority-copy">
+                  <strong>Mounting kit</strong>
+                  <small>MK-0098 · 1.2k units</small>
+                </div>
+                <span class="status stable">Stable</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="benefits">
+          <div><span>✓</span>Live multi-site visibility</div>
+          <div><span>✓</span>Automated reorder signals</div>
+          <div><span>✓</span>Audit-ready reporting</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= RIGHT FORM PANEL ================= -->
+    <section class="form-panel">
+      <header class="form-header">
+        <a href="/" class="brand-logo form-logo">
+          <span class="logo-mark">
+            <i></i><i></i><i></i>
+          </span>
+          <span>Smart<span>Stock</span></span>
+        </a>
+
+        <div class="help">
+          Need help?
+          <a href="#">Contact support</a>
+        </div>
+      </header>
+
+      <div class="form-container">
+        <div class="form-heading">
+          <h2>Create your account</h2>
+          <p>Start making faster, smarter inventory decisions today.</p>
+        </div>
+
+        <form action="/api/auth/register" method="POST" class="signup-form">
+          <div class="field">
+            <label for="username">Full name</label>
+            <div class="input-wrap">
+              <span class="input-icon">◌</span>
+              <input
+                id="fullName"
+                name="username"
+                type="text"
+                placeholder="Your full name"
+                autocomplete="name"
+                required
+              >
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="email">Work email</label>
+            <div class="input-wrap">
+              <span class="input-icon">✉</span>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                placeholder="you@company.com"
+                autocomplete="email"
+                required
+              >
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="mobile">Mobile number</label>
+            <div class="input-wrap">
+              <span class="input-icon phone">⌕</span>
+              <input
+                id="mobile"
+                name="mobile"
+                type="tel"
+                placeholder="+1 (555) 000-0000"
+                autocomplete="tel"
+                required
+              >
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="password">Password</label>
+            <div class="input-wrap">
+              <span class="input-icon lock">▢</span>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                placeholder="Create at least 8 characters"
+                minlength="8"
+                autocomplete="new-password"
+                required
+              >
+              <button
+                type="button"
+                class="password-toggle"
+                onclick="togglePassword()"
+                aria-label="Show password"
+              >◉</button>
+            </div>
+          </div>
+
+          <label class="terms">
+            <input type="checkbox" name="terms" required>
+            <span class="custom-check">✓</span>
+            <span>
+              I agree to the
+              <a href="#">Terms of Service</a>
+              and
+              <a href="#">Privacy Policy</a>.
+            </span>
+          </label>
+
+          <button type="submit" class="create-btn">
+            <span>Create account</span>
+            <span class="button-arrow">→</span>
+          </button>
+        </form>
+
+        <div class="divider"><span>OR CONTINUE WITH</span></div>
+
+        <button type="button" class="google-btn">
+          <span class="google-icon">G</span>
+          <strong>Continue with Google</strong>
+        </button>
+
+        <p class="signin-text">
+          Already have an account?
+          <a href="/login">Sign in</a>
+        </p>
+      </div>
+
+      <footer class="security-footer">
+        <div class="security">
+          <span>♢</span>
+          Enterprise-grade encryption
+        </div>
+        <div>99.9% uptime · Privacy · Terms</div>
+      </footer>
+    </section>
+  </main>
+
+  <script>
+    function togglePassword() {
+      const password = document.getElementById("password");
+      const toggle = document.querySelector(".password-toggle");
+
+      if (password.type === "password") {
+        password.type = "text";
+        toggle.textContent = "◉";
+        toggle.setAttribute("aria-label", "Hide password");
+      } else {
+        password.type = "password";
+        toggle.textContent = "◉";
+        toggle.setAttribute("aria-label", "Show password");
+      }
+    }
+  </script>
+</body>
+</html>

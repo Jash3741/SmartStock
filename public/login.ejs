@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartStock — Sign In</title>
+  <link rel="stylesheet" href="./css/login.css">
+</head>
+<body>
+  <main class="login-page">
+
+    <!-- LEFT / BRAND PANEL -->
+    <section class="brand-panel">
+      <div class="brand-orb orb-top"></div>
+      <div class="brand-orb orb-bottom"></div>
+
+      <div class="brand-content">
+        <a class="brand-logo" href="/">
+          <span class="logo-mark">
+            <i></i><i></i><i></i>
+          </span>
+          <span>Smart<span>Stock</span></span>
+        </a>
+
+        <div class="hero-copy">
+          <div class="eyebrow">
+            <span class="spark">✣</span>
+            INVENTORY INTELLIGENCE, SIMPLIFIED
+          </div>
+
+          <h1>
+            Know what’s in stock.<br>
+            <span>Before it matters.</span>
+          </h1>
+
+          <p>
+            Turn live inventory data into confident purchasing decisions across
+            every location, supplier, and SKU.
+          </p>
+        </div>
+
+        <!-- Dashboard preview -->
+        <div class="dashboard-card">
+          <div class="dashboard-head">
+            <div class="dashboard-title">
+              <span class="mini-icon">▣</span>
+              <div>
+                <strong>Northline Operations</strong>
+                <small>Live inventory overview</small>
+              </div>
+            </div>
+            <span class="sync-pill"><b></b> SYNCED NOW</span>
+          </div>
+
+          <div class="metric-grid">
+            <div class="metric-card">
+              <div class="metric-top">
+                <span class="metric-icon money">$</span>
+                <strong>+8.2%</strong>
+              </div>
+              <div class="metric-value">$284.6k</div>
+              <small>Inventory value</small>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-top">
+                <span class="metric-icon people">♧</span>
+                <strong>+4.6%</strong>
+              </div>
+              <div class="metric-value">18,429</div>
+              <small>Units in stock</small>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-top">
+                <span class="metric-icon warning">△</span>
+                <strong class="orange">Action</strong>
+              </div>
+              <div class="metric-value">24</div>
+              <small>Reorder alerts</small>
+            </div>
+          </div>
+
+          <div class="dashboard-bottom">
+            <div class="chart-card">
+              <div class="section-heading">
+                <div>
+                  <strong>Stock movement</strong>
+                  <small>Units received, last 12 weeks</small>
+                </div>
+                <span>12W</span>
+              </div>
+
+              <div class="chart">
+                <div class="bar b1"></div>
+                <div class="bar b2"></div>
+                <div class="bar b3"></div>
+                <div class="bar b4"></div>
+                <div class="bar b5"></div>
+                <div class="bar b6"></div>
+                <div class="bar b7"></div>
+                <div class="bar b8"></div>
+                <div class="bar green b9"></div>
+                <div class="bar green b10"></div>
+                <div class="bar green b11"></div>
+                <div class="bar green b12"></div>
+              </div>
+
+              <div class="chart-labels">
+                <span>JUL</span>
+                <span>SEP</span>
+              </div>
+            </div>
+
+            <div class="priority-card">
+              <div class="section-heading">
+                <strong>Priority inventory</strong>
+                <a href="#">View all</a>
+              </div>
+
+              <div class="inventory-row">
+                <span class="cube">◇</span>
+                <div>
+                  <strong>Sensor module</strong>
+                  <small>SS-2041 · 842 units</small>
+                </div>
+                <em class="status healthy">Healthy</em>
+              </div>
+
+              <div class="inventory-row">
+                <span class="cube">◇</span>
+                <div>
+                  <strong>Power adapter</strong>
+                  <small>PA-1180 · 73 units</small>
+                </div>
+                <em class="status low">Low</em>
+              </div>
+
+              <div class="inventory-row">
+                <span class="cube">◇</span>
+                <div>
+                  <strong>Mounting kit</strong>
+                  <small>MK-0098 · 1.2k units</small>
+                </div>
+                <em class="status stable">Stable</em>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="benefits">
+          <div><span>✓</span> Live multi-site visibility</div>
+          <div><span>✓</span> Automated reorder signals</div>
+          <div><span>✓</span> Audit-ready reporting</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RIGHT / LOGIN PANEL -->
+    <section class="form-panel">
+      <header class="form-header">
+        <a class="brand-logo light-logo" href="/">
+          <span class="logo-mark">
+            <i></i><i></i><i></i>
+          </span>
+          <span>Smart<span>Stock</span></span>
+        </a>
+
+        <div class="support">
+          Need help?
+          <a href="#">Contact support</a>
+        </div>
+      </header>
+
+      <div class="form-wrap">
+        <h2>Welcome back</h2>
+        <p class="subtitle">Sign in to monitor inventory, orders, and operations.</p>
+
+        <div id="login-message"></div>
+
+        <form id="login-form">
+          <div class="field">
+            <label for="email">Work email</label>
+            <div class="input-wrap">
+              <span class="input-icon">✉</span>
+              <input id="email" name="email" type="email"
+                     placeholder="you@company.com" autocomplete="email" required>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="password">Password</label>
+            <div class="input-wrap">
+              <span class="input-icon lock">♙</span>
+              <input id="password" name="password" type="password"
+                     placeholder="•••••••••••" autocomplete="current-password" required>
+              <button class="password-toggle" type="button" aria-label="Show password"
+                      onclick="togglePassword()">◉</button>
+            </div>
+          </div>
+
+          <div class="form-options">
+            <label class="remember">
+              <input type="checkbox" name="remember">
+              <span class="checkmark">✓</span>
+              <span>Remember me</span>
+            </label>
+            <a href="/forgot-password">Forgot password?</a>
+          </div>
+
+          <button class="primary-btn" type="submit">
+            <span>Sign in</span>
+            <span class="arrow">→</span>
+          </button>
+        </form>
+
+        <div class="divider"><span>OR CONTINUE WITH</span></div>
+
+        <button class="google-btn" type="button">
+          <span class="google-g">G</span>
+          <strong>Continue with Google</strong>
+        </button>
+
+        <p class="create-account">
+          New to SmartStock?
+          <a href="/signup">Create an account</a>
+        </p>
+      </div>
+
+      <footer class="security-footer">
+        <div><span>♢</span> Enterprise-grade encryption</div>
+        <div>99.9% uptime · Privacy · Terms</div>
+      </footer>
+    </section>
+  </main>
+
+  <script>
+  //   // Check if user is already logged in
+  //   if (localStorage.getItem("smartstockToken")) {
+  //     window.location.href = "    /";
+  //   }
+
+  //   function togglePassword() {
+  //     const input = document.getElementById('password');
+  //     const button = document.querySelector('.password-toggle');
+
+  //     if (input.type === 'password') {
+  //       input.type = 'text';
+  //       button.textContent = '◉';
+  //       button.setAttribute('aria-label', 'Hide password');
+  //     } else {
+  //       input.type = 'password';
+  //       button.textContent = '◉';
+  //       button.setAttribute('aria-label', 'Show password');
+  //     }
+  //   }
+
+  //   // Handle login form submission
+  //   const loginForm = document.getElementById("login-form");
+  //   const loginMessage = document.getElementById("login-message");
+
+  //   loginForm.addEventListener("submit", async (event) => {
+  //     event.preventDefault();
+  //     loginMessage.textContent = "Signing in…";
+  //     loginMessage.className = "form-message";
+
+  //     const email = document.getElementById("email").value;
+  //     const password = document.getElementById("password").value;
+
+  //     try {
+  //       const response = await fetch("/api/auth/login", {
+  //         method: "POST",
+  //         headers: { "Content-Type": "application/json" },
+  //         body: JSON.stringify({ email, password })
+  //       });
+  //       const data = await response.json();
+
+  //       if (!response.ok) throw new Error(data.message);
+
+  //       localStorage.setItem("smartstockToken", data.token);
+  //       localStorage.setItem("smartstockUser", JSON.stringify(data.user));
+        
+  //       // Redirect to dashboard after successful login
+  //       window.location.href = "/dashboard.html";
+  //     } catch (error) {
+  //       loginMessage.textContent = error.message || "Unable to sign in.";
+  //       loginMessage.className = "form-message error";
+  //     }
+  //   });
+  // </script>
+</body>
+</html>
