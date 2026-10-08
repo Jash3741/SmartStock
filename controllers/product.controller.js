@@ -1,6 +1,6 @@
 const ProductModel = require("../model/product.model");
 const CategoryModel = require("../model/category.model");
-const UnitModel = require("../model/unit.model");
+const SupplierModel = require("../model/supplier.model");
 const UserModel = require("../model/user.model");
 const mongoose = require("mongoose");
 
@@ -147,12 +147,10 @@ module.exports.inventory = async (req, res) => {
     const totalPages = Math.ceil(filteredCount / limit) || 1;
     const skip = (page - 1) * limit;
 
-    // Fetch Products with populated category & unit references
+    // Fetch Products with populated category reference
     const products = await ProductModel.find(finalQuery)
       .populate("categoryId", "name")
       .populate("category", "name")
-      .populate("unitId", "name symbol")
-      .populate("unit", "name symbol")
       .sort(sortQuery)
       .skip(skip)
       .limit(limit);
@@ -191,14 +189,16 @@ module.exports.inventory = async (req, res) => {
 module.exports.renderAddProduct = async (req, res) => {
   try {
     const user = await resolveUser(req);
-    const categories = await CategoryModel.find({ status: { $ne: "inactive" } }).sort({ name: 1 });
-    const units = await UnitModel.find({ status: { $ne: "inactive" } }).sort({ name: 1 });
+    const [categories, suppliers] = await Promise.all([
+      CategoryModel.find({ status: { $ne: "inactive" } }).sort({ name: 1 }),
+      SupplierModel.find({ status: { $ne: "inactive" } }).sort({ name: 1 })
+    ]);
 
     res.render("./user/add-product.ejs", {
       User: user,
       reqUser: user,
       categories,
-      units,
+      suppliers,
     });
   } catch (err) {
     console.error("RENDER ADD PRODUCT ERROR:", err);
@@ -216,13 +216,10 @@ module.exports.newProduct = async (req, res) => {
       barcode,
       categoryId,
       category,
-      unitId,
-      unit,
       price,
       sellingPrice,
       purchasePrice,
       costPrice,
-      quantity,
       supplier,
       description,
       tax,
@@ -234,7 +231,6 @@ module.exports.newProduct = async (req, res) => {
 
     const finalProductName = (productName || name || "").trim();
     const finalCategoryId = categoryId || category;
-    const finalUnitId = unitId || unit;
 
     const finalSellingPrice = sellingPrice !== undefined && sellingPrice !== "" 
       ? Number(sellingPrice) 
@@ -244,7 +240,8 @@ module.exports.newProduct = async (req, res) => {
       ? Number(purchasePrice) 
       : (costPrice !== undefined && costPrice !== "" ? Number(costPrice) : 0);
 
-    const finalQuantity = quantity !== undefined && quantity !== "" ? Number(quantity) : 0;
+    // Initial stock is 0 (managed through purchases/inward entries)
+    const finalQuantity = 0;
     const finalGst = gst !== undefined && gst !== "" ? Number(gst) : (tax !== undefined && tax !== "" ? Number(tax) : 0);
     const finalMinStock = minimumStock !== undefined && minimumStock !== "" 
       ? Number(minimumStock) 
@@ -265,13 +262,6 @@ module.exports.newProduct = async (req, res) => {
       return res.status(400).send("Invalid category");
     }
 
-    if (!finalUnitId || !mongoose.Types.ObjectId.isValid(finalUnitId)) {
-      if (req.xhr || req.headers.accept?.includes("application/json")) {
-        return res.status(400).json({ success: false, message: "Valid unit is required" });
-      }
-      return res.status(400).send("Invalid unit");
-    }
-
     // Verify Category exists in database
     const categoryDoc = await CategoryModel.findById(finalCategoryId);
     if (!categoryDoc) {
@@ -279,15 +269,6 @@ module.exports.newProduct = async (req, res) => {
         return res.status(400).json({ success: false, message: "Category does not exist" });
       }
       return res.status(400).send("Invalid category");
-    }
-
-    // Verify Unit exists in database
-    const unitDoc = await UnitModel.findById(finalUnitId);
-    if (!unitDoc) {
-      if (req.xhr || req.headers.accept?.includes("application/json")) {
-        return res.status(400).json({ success: false, message: "Unit does not exist" });
-      }
-      return res.status(400).send("Invalid unit");
     }
 
     if (finalSellingPrice === undefined || isNaN(finalSellingPrice) || finalSellingPrice < 0) {
@@ -305,8 +286,6 @@ module.exports.newProduct = async (req, res) => {
       barcode: barcode ? barcode.trim() : undefined,
       category: categoryDoc._id,
       categoryId: categoryDoc._id,
-      unit: unitDoc._id,
-      unitId: unitDoc._id,
       supplier: supplier ? supplier.trim() : undefined,
       description: description ? description.trim() : undefined,
       purchasePrice: finalPurchasePrice,
@@ -359,9 +338,7 @@ module.exports.getProductDetails = async (req, res) => {
 
     const product = await ProductModel.findById(id)
       .populate("categoryId", "name")
-      .populate("category", "name")
-      .populate("unitId", "name symbol")
-      .populate("unit", "name symbol");
+      .populate("category", "name");
 
     if (!product) {
       if (req.xhr || req.headers.accept?.includes("application/json")) {
@@ -401,15 +378,17 @@ module.exports.renderEditProduct = async (req, res) => {
     }
 
     const user = await resolveUser(req);
-    const categories = await CategoryModel.find({ status: { $ne: "inactive" } }).sort({ name: 1 });
-    const units = await UnitModel.find({ status: { $ne: "inactive" } }).sort({ name: 1 });
+    const [categories, suppliers] = await Promise.all([
+      CategoryModel.find({ status: { $ne: "inactive" } }).sort({ name: 1 }),
+      SupplierModel.find({ status: { $ne: "inactive" } }).sort({ name: 1 })
+    ]);
 
     res.render("./user/edit-product.ejs", {
       User: user,
       reqUser: user,
       product,
       categories,
-      units,
+      suppliers,
       isViewOnly: false
     });
   } catch (err) {
@@ -444,8 +423,6 @@ module.exports.updateProduct = async (req, res) => {
       barcode,
       categoryId,
       category,
-      unitId,
-      unit,
       price,
       sellingPrice,
       purchasePrice,
@@ -462,7 +439,6 @@ module.exports.updateProduct = async (req, res) => {
 
     const finalProductName = productName !== undefined ? productName.trim() : (name !== undefined ? name.trim() : existingProduct.productName);
     const finalCategoryId = categoryId || category || existingProduct.categoryId || existingProduct.category;
-    const finalUnitId = unitId || unit || existingProduct.unitId || existingProduct.unit;
 
     if (!finalProductName) {
       return res.status(400).send("Product name cannot be empty");
@@ -472,18 +448,9 @@ module.exports.updateProduct = async (req, res) => {
       return res.status(400).send("Invalid category");
     }
 
-    if (!mongoose.Types.ObjectId.isValid(finalUnitId)) {
-      return res.status(400).send("Invalid unit");
-    }
-
     const categoryDoc = await CategoryModel.findById(finalCategoryId);
     if (!categoryDoc) {
       return res.status(400).send("Selected category does not exist");
-    }
-
-    const unitDoc = await UnitModel.findById(finalUnitId);
-    if (!unitDoc) {
-      return res.status(400).send("Selected unit does not exist");
     }
 
     const finalSellingPrice = sellingPrice !== undefined && sellingPrice !== "" 
@@ -505,8 +472,6 @@ module.exports.updateProduct = async (req, res) => {
     if (barcode !== undefined) existingProduct.barcode = barcode ? barcode.trim() : undefined;
     existingProduct.category = categoryDoc._id;
     existingProduct.categoryId = categoryDoc._id;
-    existingProduct.unit = unitDoc._id;
-    existingProduct.unitId = unitDoc._id;
     if (supplier !== undefined) existingProduct.supplier = supplier ? supplier.trim() : undefined;
     if (description !== undefined) existingProduct.description = description ? description.trim() : undefined;
     existingProduct.purchasePrice = finalPurchasePrice;

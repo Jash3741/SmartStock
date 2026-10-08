@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartStock - New Purchase Entry</title>
+  <link rel="stylesheet" href="/css/purchase.css">
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ================= SIDEBAR ================= -->
+  <aside class="sidebar">
+
+    <a href="/<%= User._id %>/dashboard" class="brand">
+      <span class="brand-mark">
+        <i></i><i></i><i></i>
+      </span>
+      <span>Smart<span>Stock</span></span>
+    </a>
+
+    <button class="workspace">
+      <span class="workspace-icon">▣</span>
+      <span class="workspace-text">
+        <strong>Northline Ops</strong>
+        <small>4 locations</small>
+      </span>
+      <span class="workspace-arrow">⌄</span>
+    </button>
+
+    <nav class="navigation">
+      <div class="nav-title">WORKSPACE</div>
+
+      <a href="/<%= User._id %>/dashboard" class="nav-item">
+        <span>▦</span>
+        Dashboard
+      </a>
+
+      <a href="/products/add" class="nav-item">
+        <span>⊕</span>
+        Add Product
+      </a>
+
+      <a href="/inventory" class="nav-item">
+        <span>♧</span>
+        Inventory
+      </a>
+
+      <a href="/purchases" class="nav-item active">
+        <span>🛒</span>
+        Purchases
+      </a>
+
+      <a href="/sales" class="nav-item">
+        <span>$</span>
+        Sales
+      </a>
+
+      <a href="/reports" class="nav-item">
+        <span>▥</span>
+        Reports
+      </a>
+
+      <div class="nav-title manage-title">MANAGE</div>
+
+      <a href="/suppliers" class="nav-item">
+        <span>▱</span>
+        Suppliers
+      </a>
+
+      <a href="/locations" class="nav-item">
+        <span>⌖</span>
+        Locations
+      </a>
+
+      <a href="/settings" class="nav-item">
+        <span>⚙</span>
+        Settings
+      </a>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <div class="health-card">
+        <div class="health-top">
+          <span>Inventory health</span>
+          <strong>92%</strong>
+        </div>
+        <div class="health-bar">
+          <span></span>
+        </div>
+        <small>Real-time Inventory sync active</small>
+      </div>
+
+      <a href="/<%= User._id %>/user/profile" class="user">
+        <div class="avatar">
+          <%= typeof reqUser !== 'undefined' && reqUser?.username
+              ? reqUser.username.substring(0, 2).toUpperCase()
+              : 'TM' %>
+        </div>
+        <div class="user-info">
+          <strong><%= typeof reqUser !== 'undefined' && reqUser?.username ? reqUser.username : 'Admin' %></strong>
+          <small>Verified User</small>
+        </div>
+      </a>
+    </div>
+
+  </aside>
+
+  <!-- ================= MAIN CONTENT ================= -->
+  <main class="main">
+
+    <!-- Topbar -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <h2 class="topbar-title">Purchase Management</h2>
+        <span class="badge-tag">Stock Entry</span>
+      </div>
+      <div class="topbar-actions">
+        <a href="/purchases" class="btn btn-secondary btn-sm">← Back to Purchases</a>
+      </div>
+    </header>
+
+    <div class="content-container">
+
+      <!-- Page Header -->
+      <div class="page-header-row">
+        <div class="header-title-block">
+          <h1>New Purchase Entry</h1>
+          <p>Record inward stock from suppliers, generate batch numbers, and update inventory in real-time.</p>
+        </div>
+        <div class="header-buttons">
+          <a href="/purchases" class="btn btn-secondary">Cancel</a>
+          <button type="submit" form="purchaseForm" id="savePurchaseBtn" class="btn btn-primary">
+            <span>💾</span> Save Purchase
+          </button>
+        </div>
+      </div>
+
+      <!-- Alert Banner (Error / Success) -->
+      <div id="alertBanner" class="alert-banner">
+        <span id="alertMessage"></span>
+      </div>
+
+      <!-- Main Purchase Form -->
+      <form id="purchaseForm" autocomplete="off">
+
+        <!-- 1. Purchase & Invoice Information Card -->
+        <div class="form-card">
+          <div class="section-title">
+            <span><span>🏢</span> Purchase & Supplier Information</span>
+          </div>
+
+          <div class="form-grid-3">
+            <!-- Supplier Dropdown -->
+            <div class="form-group">
+              <label for="supplierSelect">Supplier <span class="required">*</span></label>
+              <div class="input-with-btn">
+                <select id="supplierSelect" class="form-control" required>
+                  <option value="">-- Select Active Supplier --</option>
+                  <% suppliers.forEach(supplier => { %>
+                    <option value="<%= supplier._id %>">
+                      <%= supplier.name %> (<%= supplier.phone %>)
+                    </option>
+                  <% }) %>
+                </select>
+                <button type="button" id="openSupplierModalBtn" class="btn btn-secondary" title="Quick Add Supplier">
+                  ＋
+                </button>
+              </div>
+            </div>
+
+            <!-- Purchase Invoice Number -->
+            <div class="form-group">
+              <label for="invoiceNumber">Purchase Invoice Number <span class="required">*</span></label>
+              <input 
+                type="text" 
+                id="invoiceNumber" 
+                class="form-control" 
+                value="<%= suggestedInvoiceNumber %>" 
+                placeholder="e.g. INV-PUR-2026-001" 
+                required 
+              />
+            </div>
+
+            <!-- Purchase Date -->
+            <div class="form-group">
+              <label for="purchaseDate">Purchase Date <span class="required">*</span></label>
+              <input 
+                type="date" 
+                id="purchaseDate" 
+                class="form-control" 
+                value="<%= today %>" 
+                required 
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Product Items Entry Table Card -->
+        <div class="form-card">
+          <div class="section-title">
+            <span><span>📦</span> Product Entry & Batch Allocation</span>
+            <button type="button" id="addRowBtn" class="btn btn-secondary btn-sm">
+              ＋ Add Product Row
+            </button>
+          </div>
+
+          <div class="table-responsive">
+            <table class="items-table">
+              <thead>
+                <tr>
+                  <th>Product <span class="required">*</span></th>
+                  <th>Batch Number <span class="required">*</span></th>
+                  <th>Mfg Date</th>
+                  <th>Expiry Date <span class="required">*</span></th>
+                  <th>Quantity <span class="required">*</span></th>
+                  <th>Purchase Price (₹) <span class="required">*</span></th>
+                  <th>Selling Price (₹) <span class="required">*</span></th>
+                  <th>GST %</th>
+                  <th style="text-align: right;">Total (₹)</th>
+                  <th style="text-align: center;">Action</th>
+                </tr>
+              </thead>
+              <tbody id="itemsTableBody">
+                <!-- Dynamically managed via purchase.js -->
+              </tbody>
+            </table>
+          </div>
+
+          <div style="margin-top: 12px;">
+            <button type="button" id="addRowBtnSecondary" class="btn btn-secondary btn-sm" onclick="document.getElementById('addRowBtn').click()">
+              ＋ Add Another Product
+            </button>
+          </div>
+        </div>
+
+        <!-- 3. Payment & Calculation Summary Split -->
+        <div class="summary-payment-grid">
+
+          <!-- Left Card: Payment & Status -->
+          <div class="summary-card">
+            <div class="section-title">
+              <span><span>💳</span> Payment Options</span>
+            </div>
+
+            <div class="form-grid-2" style="margin-bottom: 16px;">
+              <div class="form-group">
+                <label for="paymentMethod">Payment Method</label>
+                <select id="paymentMethod" class="form-control">
+                  <option value="Cash">Cash</option>
+                  <option value="UPI">UPI</option>
+                  <option value="Card">Card</option>
+                  <option value="Bank">Bank</option>
+                  <option value="Credit">Credit</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="paymentStatus">Payment Status</label>
+                <select id="paymentStatus" class="form-control">
+                  <option value="Paid">Paid</option>
+                  <option value="Partial">Partial</option>
+                  <option value="Pending">Pending</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="purchaseNotes">Notes / Remarks</label>
+              <textarea 
+                id="purchaseNotes" 
+                class="form-control" 
+                rows="3" 
+                placeholder="Optional supplier notes, delivery tracking, or comments..."
+              ></textarea>
+            </div>
+          </div>
+
+          <!-- Right Card: Automatic Real-Time Calculations -->
+          <div class="summary-card">
+            <div class="section-title">
+              <span><span>🧾</span> Summary Calculations</span>
+            </div>
+
+            <div class="summary-row">
+              <span class="text-muted">Total Products / Items</span>
+              <span class="val" id="totalItemsDisplay">0</span>
+            </div>
+
+            <div class="summary-row">
+              <span class="text-muted">Total Stock Units</span>
+              <span class="val" id="totalQtyDisplay">0</span>
+            </div>
+
+            <div class="summary-row">
+              <span>Subtotal (Items Subtotal)</span>
+              <span class="val" id="subtotalDisplay">₹0.00</span>
+            </div>
+
+            <div class="summary-row">
+              <span>GST Amount</span>
+              <span class="val" id="gstDisplay">₹0.00</span>
+            </div>
+
+            <div class="summary-row">
+              <span>Discount (₹)</span>
+              <input 
+                type="number" 
+                id="discountInput" 
+                class="form-control summary-discount-input" 
+                value="0" 
+                min="0" 
+                step="0.01" 
+              />
+            </div>
+
+            <div class="summary-row total-row">
+              <span>Grand Total</span>
+              <span class="val" id="grandTotalDisplay" style="color: var(--green-dark);">₹0.00</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Bottom Form Actions -->
+        <div class="form-actions-bar">
+          <a href="/purchases" class="btn btn-secondary">Cancel</a>
+          <button type="submit" class="btn btn-primary" id="savePurchaseBtnBottom" onclick="document.getElementById('purchaseForm').requestSubmit()">
+            <span>💾</span> Save Purchase
+          </button>
+        </div>
+
+      </form>
+
+    </div>
+
+  </main>
+
+</div>
+
+<!-- ================= QUICK SUPPLIER MODAL ================= -->
+<div id="supplierModal" class="modal-overlay">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Quick Add Supplier</h3>
+      <button type="button" id="closeSupplierModalBtn" class="modal-close">&times;</button>
+    </div>
+    <form id="supplierForm">
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Supplier Name <span class="required">*</span></label>
+          <input type="text" id="newSupplierName" class="form-control" placeholder="e.g. Metro Wholesale Corp" required />
+        </div>
+        <div class="form-group">
+          <label>Phone Number <span class="required">*</span></label>
+          <input type="tel" id="newSupplierPhone" class="form-control" placeholder="e.g. 9876543210" required />
+        </div>
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" id="newSupplierEmail" class="form-control" placeholder="supplier@example.com" />
+        </div>
+        <div class="form-group">
+          <label>GST Number</label>
+          <input type="text" id="newSupplierGst" class="form-control" placeholder="e.g. 24AAACC1206D1ZM" />
+        </div>
+        <div class="form-group">
+          <label>Address</label>
+          <textarea id="newSupplierAddress" class="form-control" rows="2" placeholder="City, State, Pincode"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="cancelSupplierModalBtn" class="btn btn-secondary">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save Supplier</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Raw Products Dataset for Vanilla JS -->
+<script id="productsData" type="application/json">
+  <%- JSON.stringify(products) %>
+</script>
+
+<script src="/js/purchase.js"></script>
+
+</body>
+</html>
+

@@ -32,15 +32,6 @@ const productSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Category",
     },
-    unit: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Unit",
-    },
-    unitId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Unit",
-      required: true,
-    },
     supplier:{
         type:String
     },

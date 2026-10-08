@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartStock - New Sale / Create Bill</title>
+  <link rel="stylesheet" href="/css/sale.css">
+  <!-- html5-qrcode for barcode and QR camera scanning -->
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ================= SIDEBAR ================= -->
+  <aside class="sidebar">
+
+    <a href="/<%= User._id %>/dashboard" class="brand">
+      <span class="brand-mark">
+        <i></i><i></i><i></i>
+      </span>
+      <span>Smart<span>Stock</span></span>
+    </a>
+
+    <button class="workspace">
+      <span class="workspace-icon">▣</span>
+      <span class="workspace-text">
+        <strong>Northline Ops</strong>
+        <small>4 locations</small>
+      </span>
+      <span class="workspace-arrow">⌄</span>
+    </button>
+
+    <nav class="navigation">
+      <div class="nav-title">WORKSPACE</div>
+
+      <a href="/<%= User._id %>/dashboard" class="nav-item">
+        <span>▦</span>
+        Dashboard
+      </a>
+
+      <a href="/products/add" class="nav-item">
+        <span>⊕</span>
+        Add Product
+      </a>
+
+      <a href="/inventory" class="nav-item">
+        <span>♧</span>
+        Inventory
+      </a>
+
+      <a href="/purchases" class="nav-item">
+        <span>🛒</span>
+        Purchases
+      </a>
+
+      <a href="/sales" class="nav-item active">
+        <span>$</span>
+        Sales & POS
+      </a>
+
+      <a href="/reports" class="nav-item">
+        <span>▥</span>
+        Reports
+      </a>
+
+      <div class="nav-title manage-title">MANAGE</div>
+
+      <a href="/suppliers" class="nav-item">
+        <span>▱</span>
+        Suppliers
+      </a>
+
+      <a href="/locations" class="nav-item">
+        <span>⌖</span>
+        Locations
+      </a>
+
+      <a href="/settings" class="nav-item">
+        <span>⚙</span>
+        Settings
+      </a>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <div class="health-card">
+        <div class="health-top">
+          <span>Billing System</span>
+          <strong>FEFO Active</strong>
+        </div>
+        <div class="health-bar">
+          <span></span>
+        </div>
+        <small>Inventory sync and batch deduction enabled</small>
+      </div>
+
+      <a href="/<%= User._id %>/user/profile" class="user">
+        <div class="avatar">
+          <%= typeof reqUser !== 'undefined' && reqUser?.username
+              ? reqUser.username.substring(0, 2).toUpperCase()
+              : 'TM' %>
+        </div>
+        <div class="user-info">
+          <strong><%= typeof reqUser !== 'undefined' && reqUser?.username ? reqUser.username : 'Admin' %></strong>
+          <small>Cashier / Billing Admin</small>
+        </div>
+      </a>
+    </div>
+
+  </aside>
+
+  <!-- ================= MAIN CONTENT ================= -->
+  <main class="main">
+
+    <!-- Topbar -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <h2 class="topbar-title">Point of Sale (POS)</h2>
+        <span class="badge-tag">Billing Terminal</span>
+      </div>
+      <div class="topbar-actions">
+        <a href="/sales" class="btn btn-secondary btn-sm">← Sales History</a>
+      </div>
+    </header>
+
+    <div class="content-container">
+
+      <!-- Page Header -->
+      <div class="page-header-row">
+        <div class="header-title-block">
+          <h1>New Sale / Create Bill</h1>
+          <p>Scan barcode, search products, auto-apply FEFO batches, and generate tax invoices.</p>
+        </div>
+        <div class="header-buttons">
+          <a href="/sales" class="btn btn-secondary">Cancel</a>
+          <button type="button" id="completeSaleBtn" class="btn btn-primary">
+            <span>💳</span> Complete Sale / Pay Now
+          </button>
+        </div>
+      </div>
+
+      <!-- Alert Banner -->
+      <div id="alertBanner" class="alert-banner">
+        <span id="alertMessage"></span>
+      </div>
+
+      <!-- 1. Invoice & Customer Information Card -->
+      <div class="form-card">
+        <div class="section-title">
+          <span><span>👤</span> Customer & Invoice Information</span>
+        </div>
+
+        <div class="form-grid-3">
+          <!-- Invoice Number -->
+          <div class="form-group">
+            <label>Invoice Number <span class="required">*</span></label>
+            <input 
+              type="text" 
+              id="invoiceNumberInput" 
+              class="form-control" 
+              value="<%= suggestedInvoiceNumber %>" 
+              required 
+            />
+          </div>
+
+          <!-- Sale Date -->
+          <div class="form-group">
+            <label>Sale Date <span class="required">*</span></label>
+            <input 
+              type="date" 
+              id="saleDateInput" 
+              class="form-control" 
+              value="<%= today %>" 
+              required 
+            />
+          </div>
+
+          <!-- Customer Dropdown & Quick Add -->
+          <div class="form-group">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
+              <label>Customer</label>
+              <label style="font-size: 11px; cursor: pointer; color: var(--navy); display: flex; align-items: center; gap: 4px;">
+                <input type="checkbox" id="isWalkInCheckbox" checked />
+                Walk-in Customer
+              </label>
+            </div>
+            <div class="input-with-btn">
+              <select id="customerSelect" class="form-control" disabled>
+                <option value="">-- Select Registered Customer --</option>
+                <% customers.forEach(cust => { %>
+                  <option value="<%= cust._id %>"><%= cust.name %> (<%= cust.phone || 'No phone' %>)</option>
+                <% }) %>
+              </select>
+              <button type="button" id="openCustomerModalBtn" class="btn btn-secondary" title="Quick Add Customer">
+                ＋
+              </button>
+            </div>
+            <input 
+              type="text" 
+              id="customerNameInput" 
+              class="form-control" 
+              placeholder="Customer Name (Walk-in)" 
+              value="Walk-in Customer" 
+              style="margin-top: 6px; font-size: 12px;" 
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Product Search & Barcode Scanner Panel -->
+      <div class="pos-search-row">
+
+        <!-- Barcode Scanner Card -->
+        <div class="pos-search-card">
+          <h4><span>📷</span> Barcode Scanner</h4>
+          <div class="scanner-box">
+            <input 
+              type="text" 
+              id="barcodeInput" 
+              class="form-control" 
+              placeholder="Scan barcode or type & press Enter..." 
+              autocomplete="off" 
+            />
+            <button type="button" id="openScannerBtn" class="btn btn-secondary" title="Open Camera Scanner">
+              📷 Camera
+            </button>
+          </div>
+          <small style="color: var(--muted); font-size: 11px; margin-top: 4px; display: block;">
+            USB barcode scanners will auto-add product instantly.
+          </small>
+        </div>
+
+        <!-- Manual Product Search Card -->
+        <div class="pos-search-card">
+          <h4><span>🔍</span> Search Products (Name / SKU / Barcode)</h4>
+          <div class="search-input-wrapper">
+            <input 
+              type="text" 
+              id="productSearchInput" 
+              class="form-control" 
+              placeholder="Type product name, SKU or barcode..." 
+              autocomplete="off" 
+            />
+            <div id="searchDropdown" class="search-dropdown"></div>
+          </div>
+          <small style="color: var(--muted); font-size: 11px; margin-top: 4px; display: block;">
+            Real-time search with FEFO batch selection.
+          </small>
+        </div>
+
+      </div>
+
+      <!-- 3. Shopping Cart Table Card -->
+      <div class="form-card">
+        <div class="section-title">
+          <span>
+            <span>🛒</span> Shopping Cart 
+            <span class="badge badge-fefo" style="margin-left: 8px;">FEFO Auto-Allocated</span>
+          </span>
+          <span style="font-size: 13px; color: var(--muted);">
+            Items: <strong id="cartItemCountDisplay">0</strong>
+          </span>
+        </div>
+
+        <div class="table-responsive">
+          <table class="cart-table">
+            <thead>
+              <tr>
+                <th style="min-width: 200px;">Product Name</th>
+                <th style="width: 120px;">Barcode</th>
+                <th style="min-width: 190px;">Batch (FEFO)</th>
+                <th style="width: 110px;">Expiry</th>
+                <th style="width: 130px;">Quantity</th>
+                <th style="width: 110px;">Price (₹)</th>
+                <th style="width: 75px;">GST %</th>
+                <th style="width: 85px;">Discount (₹)</th>
+                <th style="width: 110px; text-align: right;">Total (₹)</th>
+                <th style="width: 50px; text-align: center;">Action</th>
+              </tr>
+            </thead>
+            <tbody id="cartTableBody">
+              <tr id="emptyCartRow">
+                <td colspan="10" style="text-align: center; padding: 36px 16px; color: var(--muted);">
+                  🛒 Cart is empty. Scan a barcode or search products above to start billing.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 4. Payment & Calculation Summary Split -->
+      <div class="summary-payment-grid">
+
+        <!-- Left: Payment Options -->
+        <div class="summary-card">
+          <div class="section-title">
+            <span><span>💳</span> Payment Options</span>
+          </div>
+
+          <div class="form-grid-2" style="margin-bottom: 14px;">
+            <div class="form-group">
+              <label>Payment Method</label>
+              <select id="paymentMethodSelect" class="form-control">
+                <option value="Cash">Cash</option>
+                <option value="UPI">UPI</option>
+                <option value="Card">Card</option>
+                <option value="Bank">Bank Transfer</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Payment Status</label>
+              <select id="paymentStatusSelect" class="form-control">
+                <option value="Paid" selected>Paid (Full)</option>
+                <option value="Partial">Partial Payment</option>
+                <option value="Pending">Pending / Credit</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Partial Payment Group (Shown when Partial selected) -->
+          <div id="partialPaymentGroup" style="display: none; background: #f8fafc; border: 1px dashed var(--border); border-radius: 8px; padding: 12px; margin-bottom: 14px;">
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label>Paid Amount (₹)</label>
+                <input type="number" id="paidAmountInput" class="form-control" min="0" step="0.01" value="0.00" />
+              </div>
+              <div class="form-group">
+                <label>Remaining Amount (₹)</label>
+                <div id="remainingAmountDisplay" style="font-weight: 700; color: var(--red); font-size: 16px; padding-top: 8px;">₹0.00</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Notes / Remarks</label>
+            <textarea id="saleNotesInput" class="form-control" rows="2" placeholder="Optional notes for invoice..."></textarea>
+          </div>
+        </div>
+
+        <!-- Right: Automatic Real-Time Calculations -->
+        <div class="summary-card">
+          <div class="section-title">
+            <span><span>🧾</span> Summary Calculations</span>
+          </div>
+
+          <div class="summary-row">
+            <span>Subtotal (Items Subtotal)</span>
+            <span class="val" id="cartSubtotalDisplay">₹0.00</span>
+          </div>
+
+          <div class="summary-row">
+            <span>GST Amount</span>
+            <span class="val" id="cartGstDisplay">₹0.00</span>
+          </div>
+
+          <div class="summary-row">
+            <span>Bill Discount (₹)</span>
+            <input 
+              type="number" 
+              id="overallDiscountInput" 
+              class="form-control" 
+              style="width: 110px; text-align: right; padding: 5px 8px;" 
+              value="0" 
+              min="0" 
+              step="0.01" 
+            />
+          </div>
+
+          <div class="summary-row total-row">
+            <span>Grand Total</span>
+            <span class="val" id="cartGrandTotalDisplay" style="color: var(--green-dark);">₹0.00</span>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+</div>
+
+<!-- ================= CAMERA BARCODE SCANNER MODAL ================= -->
+<div id="scannerModal" class="modal-overlay">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Scan Product Barcode</h3>
+      <button type="button" id="closeScannerModalBtn" class="modal-close">&times;</button>
+    </div>
+    <div class="modal-body" style="text-align: center;">
+      <p style="margin: 0 0 10px 0; font-size: 13px; color: var(--muted);">
+        Point your camera at the product's barcode to scan and add to cart.
+      </p>
+      <div id="qr-reader" style="width: 100%; max-width: 420px; margin: 0 auto; border-radius: 8px; overflow: hidden;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= QUICK ADD CUSTOMER MODAL ================= -->
+<div id="customerModal" class="modal-overlay">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Quick Add Customer</h3>
+      <button type="button" id="closeCustomerModalBtn" class="modal-close">&times;</button>
+    </div>
+    <form id="quickCustomerForm">
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Customer Name <span class="required">*</span></label>
+          <input type="text" id="newCustName" class="form-control" placeholder="e.g. Ramesh Kumar" required />
+        </div>
+        <div class="form-group">
+          <label>Phone Number</label>
+          <input type="tel" id="newCustPhone" class="form-control" placeholder="e.g. 9825012345" />
+        </div>
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" id="newCustEmail" class="form-control" placeholder="e.g. ramesh@example.com" />
+        </div>
+        <div class="form-group">
+          <label>GST Number (Optional)</label>
+          <input type="text" id="newCustGst" class="form-control" placeholder="e.g. 24AABCR1234A1Z1" />
+        </div>
+        <div class="form-group">
+          <label>Address</label>
+          <textarea id="newCustAddress" class="form-control" rows="2" placeholder="City, Address..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="cancelCustomerModalBtn" class="btn btn-secondary">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save Customer</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="/js/sale.js"></script>
+
+</body>
+</html>
+

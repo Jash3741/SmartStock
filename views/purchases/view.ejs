@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartStock - Purchase Invoice #<%= purchase.invoiceNumber %></title>
+  <link rel="stylesheet" href="/css/purchase.css">
+  <style>
+    @media print {
+      .sidebar, .topbar, .btn, .header-buttons {
+        display: none !important;
+      }
+      .app {
+        display: block !important;
+      }
+      .main {
+        width: 100% !important;
+      }
+      .content-container {
+        padding: 0 !important;
+      }
+      .form-card {
+        border: none !important;
+        box-shadow: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ================= SIDEBAR ================= -->
+  <aside class="sidebar">
+
+    <a href="/<%= User._id %>/dashboard" class="brand">
+      <span class="brand-mark">
+        <i></i><i></i><i></i>
+      </span>
+      <span>Smart<span>Stock</span></span>
+    </a>
+
+    <button class="workspace">
+      <span class="workspace-icon">▣</span>
+      <span class="workspace-text">
+        <strong>Northline Ops</strong>
+        <small>4 locations</small>
+      </span>
+      <span class="workspace-arrow">⌄</span>
+    </button>
+
+    <nav class="navigation">
+      <div class="nav-title">WORKSPACE</div>
+
+      <a href="/<%= User._id %>/dashboard" class="nav-item">
+        <span>▦</span>
+        Dashboard
+      </a>
+
+      <a href="/products/add" class="nav-item">
+        <span>⊕</span>
+        Add Product
+      </a>
+
+      <a href="/inventory" class="nav-item">
+        <span>♧</span>
+        Inventory
+      </a>
+
+      <a href="/purchases" class="nav-item active">
+        <span>🛒</span>
+        Purchases
+      </a>
+
+      <a href="/sales" class="nav-item">
+        <span>$</span>
+        Sales
+      </a>
+
+      <a href="/reports" class="nav-item">
+        <span>▥</span>
+        Reports
+      </a>
+
+      <div class="nav-title manage-title">MANAGE</div>
+
+      <a href="/suppliers" class="nav-item">
+        <span>▱</span>
+        Suppliers
+      </a>
+
+      <a href="/locations" class="nav-item">
+        <span>⌖</span>
+        Locations
+      </a>
+
+      <a href="/settings" class="nav-item">
+        <span>⚙</span>
+        Settings
+      </a>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <div class="health-card">
+        <div class="health-top">
+          <span>Inventory health</span>
+          <strong>92%</strong>
+        </div>
+        <div class="health-bar">
+          <span></span>
+        </div>
+        <small>Real-time Inventory sync active</small>
+      </div>
+
+      <a href="/<%= User._id %>/user/profile" class="user">
+        <div class="avatar">
+          <%= typeof reqUser !== 'undefined' && reqUser?.username
+              ? reqUser.username.substring(0, 2).toUpperCase()
+              : 'TM' %>
+        </div>
+        <div class="user-info">
+          <strong><%= typeof reqUser !== 'undefined' && reqUser?.username ? reqUser.username : 'Admin' %></strong>
+          <small>Verified User</small>
+        </div>
+      </a>
+    </div>
+
+  </aside>
+
+  <!-- ================= MAIN CONTENT ================= -->
+  <main class="main">
+
+    <!-- Topbar -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <h2 class="topbar-title">Invoice #<%= purchase.invoiceNumber %></h2>
+        <span class="badge-tag">Purchase Details</span>
+      </div>
+      <div class="topbar-actions">
+        <a href="/purchases" class="btn btn-secondary btn-sm">← Back to Purchases</a>
+        <button onclick="window.print()" class="btn btn-primary btn-sm">🖨 Print Invoice</button>
+      </div>
+    </header>
+
+    <div class="content-container">
+
+      <!-- Header Row -->
+      <div class="page-header-row">
+        <div class="header-title-block">
+          <h1>Purchase Invoice Details</h1>
+          <p>Created on <%= new Date(purchase.createdAt).toLocaleString('en-IN') %> by <%= purchase.createdBy ? purchase.createdBy.username : 'System' %></p>
+        </div>
+        <div class="header-buttons">
+          <a href="/purchases" class="btn btn-secondary">Back</a>
+          <button onclick="window.print()" class="btn btn-primary">🖨 Print Invoice</button>
+        </div>
+      </div>
+
+      <!-- Invoice Overview Cards -->
+      <div class="summary-payment-grid">
+
+        <!-- Supplier Details -->
+        <div class="form-card">
+          <div class="section-title">
+            <span><span>🏢</span> Supplier Information</span>
+            <span class="badge badge-active">Verified</span>
+          </div>
+
+          <div style="font-size: 14px; line-height: 1.8;">
+            <div style="font-size: 18px; font-weight: 700; color: var(--navy); margin-bottom: 4px;">
+              <%= purchase.supplier ? purchase.supplier.name : 'Unknown Supplier' %>
+            </div>
+            <% if (purchase.supplier) { %>
+              <div><strong>Phone:</strong> <%= purchase.supplier.phone || 'N/A' %></div>
+              <div><strong>Email:</strong> <%= purchase.supplier.email || 'N/A' %></div>
+              <div><strong>GSTIN:</strong> <%= purchase.supplier.gstNumber || 'Unregistered' %></div>
+              <div><strong>Address:</strong> <%= purchase.supplier.address || 'N/A' %></div>
+            <% } %>
+          </div>
+        </div>
+
+        <!-- Invoice & Payment Metadata -->
+        <div class="form-card">
+          <div class="section-title">
+            <span><span>📋</span> Invoice & Payment Status</span>
+            <% if (purchase.paymentStatus === 'Paid') { %>
+              <span class="badge badge-paid">PAID</span>
+            <% } else if (purchase.paymentStatus === 'Partial') { %>
+              <span class="badge badge-partial">PARTIAL</span>
+            <% } else { %>
+              <span class="badge badge-pending">PENDING</span>
+            <% } %>
+          </div>
+
+          <div style="font-size: 14px; line-height: 1.8;">
+            <div><strong>Invoice Number:</strong> <%= purchase.invoiceNumber %></div>
+            <div><strong>Purchase Date:</strong> <%= new Date(purchase.purchaseDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) %></div>
+            <div><strong>Payment Method:</strong> <%= purchase.paymentMethod %></div>
+            <div><strong>Payment Status:</strong> <%= purchase.paymentStatus %></div>
+            <% if (purchase.notes) { %>
+              <div style="margin-top: 8px; color: var(--muted);"><strong>Notes:</strong> <%= purchase.notes %></div>
+            <% } %>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Purchased Items Table -->
+      <div class="form-card">
+        <div class="section-title">
+          <span><span>📦</span> Line Items</span>
+          <span style="font-size: 13px; color: var(--muted);"><%= items.length %> Products Included</span>
+        </div>
+
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Product</th>
+                <th>SKU</th>
+                <th>Batch Number</th>
+                <th>Mfg Date</th>
+                <th>Expiry Date</th>
+                <th style="text-align: right;">Quantity</th>
+                <th style="text-align: right;">Purchase Price</th>
+                <th style="text-align: right;">Selling Price</th>
+                <th style="text-align: right;">GST %</th>
+                <th style="text-align: right;">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% items.forEach((item, index) => { %>
+                <tr>
+                  <td><%= index + 1 %></td>
+                  <td>
+                    <strong><%= item.product ? item.product.productName : 'Product Removed' %></strong>
+                    <% if (item.product && item.product.category) { %>
+                      <small style="color: var(--muted); display: block;"><%= item.product.category.name %></small>
+                    <% } %>
+                  </td>
+                  <td><%= item.product ? item.product.sku : 'N/A' %></td>
+                  <td>
+                    <span style="font-family: monospace; font-weight: 700; color: var(--navy);">
+                      <%= item.batch ? item.batch.batchNumber : 'N/A' %>
+                    </span>
+                  </td>
+                  <td>
+                    <%= item.batch && item.batch.manufacturingDate 
+                        ? new Date(item.batch.manufacturingDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) 
+                        : '-' %>
+                  </td>
+                  <td>
+                    <span style="color: var(--navy); font-weight: 600;">
+                      <%= item.batch && item.batch.expiryDate 
+                          ? new Date(item.batch.expiryDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) 
+                          : 'N/A' %>
+                    </span>
+                  </td>
+                  <td style="text-align: right; font-weight: 700;">
+                    <%= item.quantity %>
+                  </td>
+                  <td style="text-align: right;">₹<%= Number(item.purchasePrice || 0).toFixed(2) %></td>
+                  <td style="text-align: right;">₹<%= Number(item.sellingPrice || 0).toFixed(2) %></td>
+                  <td style="text-align: right;"><%= Number(item.gst || 0) %>%</td>
+                  <td style="text-align: right; font-weight: 700; color: var(--text-dark);">
+                    ₹<%= Number(item.total || 0).toFixed(2) %>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Summary Totals Section -->
+        <div style="display: flex; justify-content: flex-end; margin-top: 24px;">
+          <div style="width: 320px; background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 16px;">
+            <div class="summary-row">
+              <span class="text-muted">Subtotal</span>
+              <span class="val">₹<%= Number(purchase.subtotal || 0).toFixed(2) %></span>
+            </div>
+            <div class="summary-row">
+              <span class="text-muted">GST Amount</span>
+              <span class="val">₹<%= Number(purchase.gstAmount || 0).toFixed(2) %></span>
+            </div>
+            <div class="summary-row">
+              <span class="text-muted">Discount</span>
+              <span class="val">-₹<%= Number(purchase.discount || 0).toFixed(2) %></span>
+            </div>
+            <div class="summary-row total-row">
+              <span>Grand Total</span>
+              <span class="val" style="color: var(--green-dark);">₹<%= Number(purchase.grandTotal || 0).toFixed(2) %></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Inventory Log Audit Trail -->
+      <% if (inventoryLogs && inventoryLogs.length > 0) { %>
+        <div class="form-card">
+          <div class="section-title">
+            <span><span>📊</span> Inventory Audit Trail</span>
+            <span class="badge badge-paid">Synchronized</span>
+          </div>
+
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th>Batch</th>
+                  <th>Movement Type</th>
+                  <th>Stock Before</th>
+                  <th>Purchased (+Qty)</th>
+                  <th>New Stock Level</th>
+                  <th>Logged Time</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% inventoryLogs.forEach(log => { %>
+                  <tr>
+                    <td><strong><%= log.product ? log.product.productName : 'Product' %></strong></td>
+                    <td><code><%= log.batch ? log.batch.batchNumber : 'N/A' %></code></td>
+                    <td><span class="badge badge-paid"><%= log.type %></span></td>
+                    <td><%= log.previousStock %> units</td>
+                    <td style="font-weight: 700; color: var(--green-dark);">+<%= log.quantity %> units</td>
+                    <td style="font-weight: 700; color: var(--navy);"><%= log.newStock %> units</td>
+                    <td><%= new Date(log.createdAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) %></td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      <% } %>
+
+    </div>
+
+  </main>
+
+</div>
+
+</body>
+</html>
+

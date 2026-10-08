@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartStock - Invoice #<%= sale.invoiceNumber %></title>
+  <link rel="stylesheet" href="/css/sale.css">
+  <style>
+    .invoice-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 32px;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 24px;
+    }
+    .invoice-header-grid {
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 20px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    .shop-title {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--navy);
+      margin: 0 0 6px 0;
+    }
+    .shop-subtitle {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+    .invoice-meta-box {
+      text-align: right;
+    }
+    .invoice-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--navy);
+      margin: 0 0 6px 0;
+    }
+    .invoice-meta-row {
+      font-size: 13px;
+      margin: 3px 0;
+      color: var(--text);
+    }
+    .parties-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+    .party-card {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    .party-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    @media print {
+      .invoice-card {
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ================= SIDEBAR ================= -->
+  <aside class="sidebar">
+
+    <a href="/<%= User._id %>/dashboard" class="brand">
+      <span class="brand-mark">
+        <i></i><i></i><i></i>
+      </span>
+      <span>Smart<span>Stock</span></span>
+    </a>
+
+    <button class="workspace">
+      <span class="workspace-icon">▣</span>
+      <span class="workspace-text">
+        <strong>Northline Ops</strong>
+        <small>4 locations</small>
+      </span>
+      <span class="workspace-arrow">⌄</span>
+    </button>
+
+    <nav class="navigation">
+      <div class="nav-title">WORKSPACE</div>
+
+      <a href="/<%= User._id %>/dashboard" class="nav-item">
+        <span>▦</span>
+        Dashboard
+      </a>
+
+      <a href="/products/add" class="nav-item">
+        <span>⊕</span>
+        Add Product
+      </a>
+
+      <a href="/inventory" class="nav-item">
+        <span>♧</span>
+        Inventory
+      </a>
+
+      <a href="/purchases" class="nav-item">
+        <span>🛒</span>
+        Purchases
+      </a>
+
+      <a href="/sales" class="nav-item active">
+        <span>$</span>
+        Sales & POS
+      </a>
+
+      <a href="/reports" class="nav-item">
+        <span>▥</span>
+        Reports
+      </a>
+
+      <div class="nav-title manage-title">MANAGE</div>
+
+      <a href="/suppliers" class="nav-item">
+        <span>▱</span>
+        Suppliers
+      </a>
+
+      <a href="/locations" class="nav-item">
+        <span>⌖</span>
+        Locations
+      </a>
+
+      <a href="/settings" class="nav-item">
+        <span>⚙</span>
+        Settings
+      </a>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <div class="health-card">
+        <div class="health-top">
+          <span>Billing Terminal</span>
+          <strong>Active</strong>
+        </div>
+        <div class="health-bar">
+          <span></span>
+        </div>
+        <small>Real-time inventory sync</small>
+      </div>
+
+      <a href="/<%= User._id %>/user/profile" class="user">
+        <div class="avatar">
+          <%= typeof reqUser !== 'undefined' && reqUser?.username
+              ? reqUser.username.substring(0, 2).toUpperCase()
+              : 'TM' %>
+        </div>
+        <div class="user-info">
+          <strong><%= typeof reqUser !== 'undefined' && reqUser?.username ? reqUser.username : 'Admin' %></strong>
+          <small>Verified User</small>
+        </div>
+      </a>
+    </div>
+
+  </aside>
+
+  <!-- ================= MAIN CONTENT ================= -->
+  <main class="main">
+
+    <!-- Topbar -->
+    <header class="topbar no-print">
+      <div class="topbar-left">
+        <h2 class="topbar-title">Invoice #<%= sale.invoiceNumber %></h2>
+        <span class="badge-tag">Tax Invoice</span>
+      </div>
+      <div class="topbar-actions">
+        <a href="/sales" class="btn btn-secondary btn-sm">← Back to Sales</a>
+        <a href="/sales/<%= sale._id %>/pdf" class="btn btn-secondary btn-sm" target="_blank">📄 Download PDF</a>
+        <button type="button" onclick="window.print()" class="btn btn-primary btn-sm">🖨 Print Invoice</button>
+      </div>
+    </header>
+
+    <div class="content-container">
+
+      <!-- Action Bar (hidden on print) -->
+      <div class="page-header-row no-print">
+        <div class="header-title-block">
+          <h1>Invoice #<%= sale.invoiceNumber %></h1>
+          <p>Generated on <%= new Date(sale.createdAt).toLocaleString('en-IN') %> by <%= sale.createdBy ? sale.createdBy.username : 'Cashier' %></p>
+        </div>
+        <div class="header-buttons">
+          <a href="/sales/new" class="btn btn-secondary">＋ New Sale</a>
+          <a href="/sales/<%= sale._id %>/pdf" class="btn btn-secondary" target="_blank">📄 Download PDF</a>
+          <button type="button" onclick="window.print()" class="btn btn-primary">
+            <span>🖨</span> Print Invoice
+          </button>
+        </div>
+      </div>
+
+      <!-- Printable Invoice Sheet -->
+      <div class="invoice-card">
+
+        <!-- Invoice Header: Shop & Meta -->
+        <div class="invoice-header-grid">
+          <div>
+            <div class="shop-title">SmartStock Store</div>
+            <div class="shop-subtitle">
+              Retail, Wholesale & Inventory Management<br>
+              101 Northline Commercial Plaza, Ring Road, Gujarat, India<br>
+              <strong>GSTIN:</strong> 24AAACS9876K1Z9 | <strong>Phone:</strong> +91 98765 43210
+            </div>
+          </div>
+
+          <div class="invoice-meta-box">
+            <div class="invoice-title">TAX INVOICE</div>
+            <div class="invoice-meta-row"><strong>Invoice No:</strong> <%= sale.invoiceNumber %></div>
+            <div class="invoice-meta-row"><strong>Date:</strong> <%= new Date(sale.saleDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) %></div>
+            <div class="invoice-meta-row"><strong>Billed By:</strong> <%= sale.createdBy ? sale.createdBy.username : 'Cashier' %></div>
+            <div class="invoice-meta-row">
+              <% const pStatus = (sale.paymentStatus || 'paid').toLowerCase(); %>
+              <% if (pStatus === 'paid') { %>
+                <span class="badge badge-paid">PAID FULL</span>
+              <% } else if (pStatus === 'partial') { %>
+                <span class="badge badge-partial">PARTIAL PAID</span>
+              <% } else { %>
+                <span class="badge badge-pending">PENDING</span>
+              <% } %>
+            </div>
+          </div>
+        </div>
+
+        <!-- Customer & Payment Metadata -->
+        <div class="parties-grid">
+          <div class="party-card">
+            <div class="party-title">Billed To (Customer)</div>
+            <div style="font-size: 15px; font-weight: 700; color: var(--navy); margin-bottom: 4px;">
+              <%= sale.customer ? sale.customer.name : (sale.customerName || 'Walk-in Customer') %>
+            </div>
+            <% if (sale.customer) { %>
+              <div><strong>Phone:</strong> <%= sale.customer.phone || 'N/A' %></div>
+              <div><strong>Email:</strong> <%= sale.customer.email || 'N/A' %></div>
+              <div><strong>GSTIN:</strong> <%= sale.customer.gstNumber || 'Unregistered' %></div>
+              <div><strong>Address:</strong> <%= sale.customer.address || 'N/A' %></div>
+            <% } else { %>
+              <div style="color: var(--muted);">Direct Counter Sale / Walk-in Customer</div>
+            <% } %>
+          </div>
+
+          <div class="party-card">
+            <div class="party-title">Payment & Settlement Details</div>
+            <div><strong>Payment Method:</strong> <span style="text-transform: uppercase;"><%= sale.paymentMethod || 'cash' %></span></div>
+            <div><strong>Payment Status:</strong> <span style="text-transform: uppercase;"><%= sale.paymentStatus || 'paid' %></span></div>
+            <div><strong>Amount Paid:</strong> ₹<%= Number(sale.paidAmount || sale.grandTotal).toFixed(2) %></div>
+            <div><strong>Balance Remaining:</strong> ₹<%= Number(sale.remainingAmount || 0).toFixed(2) %></div>
+            <% if (sale.notes) { %>
+              <div style="margin-top: 6px;"><strong>Remarks:</strong> <%= sale.notes %></div>
+            <% } %>
+          </div>
+        </div>
+
+        <!-- Line Items Table -->
+        <div style="margin-bottom: 24px;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th style="width: 40px;">#</th>
+                <th>Product Description</th>
+                <th>SKU</th>
+                <th>Batch Number</th>
+                <th>Expiry</th>
+                <th style="text-align: right;">Qty</th>
+                <th style="text-align: right;">Unit Price (₹)</th>
+                <th style="text-align: right;">GST %</th>
+                <th style="text-align: right;">Discount (₹)</th>
+                <th style="text-align: right;">Total (₹)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% items.forEach((item, index) => { %>
+                <tr>
+                  <td><%= index + 1 %></td>
+                  <td>
+                    <strong><%= item.product ? item.product.productName : 'Product Removed' %></strong>
+                    <% if (item.product && item.product.category) { %>
+                      <small style="color: var(--muted); display: block;"><%= item.product.category.name %></small>
+                    <% } %>
+                  </td>
+                  <td><code><%= item.product ? item.product.sku : 'N/A' %></code></td>
+                  <td>
+                    <span style="font-family: monospace; font-weight: 700; color: var(--navy);">
+                      <%= item.batch ? item.batch.batchNumber : 'N/A' %>
+                    </span>
+                  </td>
+                  <td>
+                    <span style="font-size: 12px;">
+                      <%= item.batch && item.batch.expiryDate ? new Date(item.batch.expiryDate).toLocaleDateString('en-IN') : '-' %>
+                    </span>
+                  </td>
+                  <td style="text-align: right; font-weight: 700;"><%= item.quantity %></td>
+                  <td style="text-align: right;">₹<%= Number(item.sellingPrice || 0).toFixed(2) %></td>
+                  <td style="text-align: right;"><%= Number(item.gst || 0) %>%</td>
+                  <td style="text-align: right;">₹<%= Number(item.discount || 0).toFixed(2) %></td>
+                  <td style="text-align: right; font-weight: 700; color: var(--text-dark);">
+                    ₹<%= Number(item.total || 0).toFixed(2) %>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Summary Calculation Box -->
+        <div style="display: flex; justify-content: flex-end; margin-bottom: 24px;">
+          <div style="width: 320px; background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 16px;">
+            <div class="summary-row">
+              <span class="text-muted">Subtotal (Items):</span>
+              <span class="val">₹<%= Number(sale.subtotal || 0).toFixed(2) %></span>
+            </div>
+            <div class="summary-row">
+              <span class="text-muted">GST Total:</span>
+              <span class="val">₹<%= Number(sale.gstAmount || 0).toFixed(2) %></span>
+            </div>
+            <div class="summary-row">
+              <span class="text-muted">Total Discount:</span>
+              <span class="val">-₹<%= Number(sale.discount || 0).toFixed(2) %></span>
+            </div>
+            <div class="summary-row total-row">
+              <span>Grand Total:</span>
+              <span class="val" style="color: var(--green-dark);">₹<%= Number(sale.grandTotal || 0).toFixed(2) %></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Terms & Footer -->
+        <div style="border-top: 1px solid var(--border); padding-top: 16px; font-size: 11px; color: var(--muted); text-align: center;">
+          Thank you for choosing SmartStock! Goods once sold can be exchanged within 7 days against this original invoice.<br>
+          This is a computer generated tax invoice.
+        </div>
+
+      </div>
+
+      <!-- Inventory Audit Trail (Hidden on print) -->
+      <% if (inventoryLogs && inventoryLogs.length > 0) { %>
+        <div class="form-card no-print">
+          <div class="section-title">
+            <span><span>📊</span> Inventory Audit Trail (Batch Stock Movements)</span>
+            <span class="badge badge-paid">Synchronized</span>
+          </div>
+
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th>Batch</th>
+                  <th>Movement Type</th>
+                  <th>Stock Before</th>
+                  <th>Sold (-Qty)</th>
+                  <th>New Stock Level</th>
+                  <th>Logged Time</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% inventoryLogs.forEach(log => { %>
+                  <tr>
+                    <td><strong><%= log.product ? log.product.productName : 'Product' %></strong></td>
+                    <td><code><%= log.batch ? log.batch.batchNumber : 'N/A' %></code></td>
+                    <td><span class="badge badge-pending"><%= log.type %></span></td>
+                    <td><%= log.previousStock %> units</td>
+                    <td style="font-weight: 700; color: var(--red);">-<%= log.quantity %> units</td>
+                    <td style="font-weight: 700; color: var(--navy);"><%= log.newStock %> units</td>
+                    <td><%= new Date(log.createdAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) %></td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      <% } %>
+
+    </div>
+
+  </main>
+
+</div>
+
+</body>
+</html>
+

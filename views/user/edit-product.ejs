@@ -294,32 +294,7 @@
             </div>
           </div>
 
-          <div class="form-grid three">
-
-            <div class="field">
-              <label for="unitId">
-                Unit <span>*</span>
-              </label>
-
-              <% if (isViewOnly) { %>
-                <input
-                  type="text"
-                  value="<%= product.unitId?.name ? `${product.unitId.name} (${product.unitId.symbol})` : 'Piece' %>"
-                  readonly
-                >
-              <% } else { %>
-                <select id="unitId" name="unitId" required>
-                  <% units.forEach(function(u) { %>
-                    <option
-                      value="<%= u._id %>"
-                      <%= (product.unitId?.toString() === u._id.toString() || product.unit?.toString() === u._id.toString()) ? 'selected' : '' %>
-                    >
-                      <%= u.name %> (<%= u.symbol %>)
-                    </option>
-                  <% }); %>
-                </select>
-              <% } %>
-            </div>
+          <div class="form-grid two">
 
             <div class="field">
               <label for="quantity">

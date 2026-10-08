@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SmartStock - Add Product</title>
+  <title>SmartStock – Add Product</title>
   <link rel="stylesheet" href="/css/add-product.css">
 </head>
 <body>
@@ -13,7 +13,7 @@
   <!-- ================= SIDEBAR ================= -->
   <aside class="sidebar">
 
-    <a href="/dashboard" class="brand">
+    <a href="/<%= User._id %>/dashboard" class="brand">
       <span class="brand-mark">
         <i></i><i></i><i></i>
       </span>
@@ -23,8 +23,8 @@
     <button class="workspace">
       <span class="workspace-icon">▣</span>
       <span class="workspace-text">
-        <strong>Northline Ops</strong>
-        <small>4 locations</small>
+        <strong>SmartStock</strong>
+        <small>Inventory Manager</small>
       </span>
       <span class="workspace-arrow">⌄</span>
     </button>
@@ -46,6 +46,11 @@
       <a href="/inventory" class="nav-item">
         <span>♧</span>
         Inventory
+      </a>
+
+      <a href="/purchases" class="nav-item">
+        <span>🛒</span>
+        Purchases
       </a>
 
       <a href="/sales" class="nav-item">
@@ -83,15 +88,13 @@
           <span>Inventory health</span>
           <strong>92%</strong>
         </div>
-
         <div class="health-bar">
           <span></span>
         </div>
-
-        <small>12,486 SKUs synced · 2m ago</small>
+        <small>Real-time sync active</small>
       </div>
 
-      <a href="/profile" class="user">
+      <a href="/<%= User._id %>/user/profile" class="user">
         <div class="avatar">
           <%= typeof reqUser !== 'undefined' && reqUser?.username
               ? reqUser.username.substring(0, 2).toUpperCase()
@@ -102,7 +105,7 @@
           <strong>
             <%= typeof reqUser !== 'undefined' && reqUser?.username
                 ? reqUser.username
-                : 'Taylor Morgan' %>
+                : 'User' %>
           </strong>
           <small>Operations admin</small>
         </div>
@@ -119,36 +122,22 @@
 
     <!-- Top bar -->
     <header class="topbar">
-
       <div class="search">
         <span class="search-icon">⌕</span>
-        <input
-          type="search"
-          placeholder="Search products, SKUs, suppliers..."
-        >
+        <input type="search" placeholder="Search products, SKUs, suppliers...">
         <kbd>⌘ K</kbd>
       </div>
 
       <div class="top-actions">
-
         <div class="sync">
           <i></i>
           SYNCED NOW
         </div>
-
-        <button class="circle-btn">?</button>
-
-        <button class="circle-btn notification">
+        <button class="circle-btn" title="Help">?</button>
+        <button class="circle-btn notification" title="Notifications">
           ♧
           <i></i>
         </button>
-
-        <button class="date-btn">
-          ▣
-          <span>Sep 1 – Sep 30</span>
-          ⌄
-        </button>
-
       </div>
     </header>
 
@@ -160,6 +149,8 @@
       <div class="breadcrumb">
         <a href="/<%= User._id %>/dashboard">Dashboard</a>
         <span>›</span>
+        <a href="/inventory">Inventory</a>
+        <span>›</span>
         <strong>Add Product</strong>
       </div>
 
@@ -168,11 +159,11 @@
       <div class="page-title">
         <div>
           <h1>Add Product</h1>
-          <p>Add a new product and keep your inventory up to date.</p>
+          <p>Register a new product. Stock is added via Purchase entries.</p>
         </div>
 
-        <a href="/products" class="back-btn">
-          ← Back to inventory
+        <a href="/inventory" class="back-btn">
+          ← Back to Inventory
         </a>
       </div>
 
@@ -182,133 +173,78 @@
         action="/<%= User._id %>/products/new"
         method="POST"
         class="product-form"
+        id="productForm"
       >
 
-        <!-- Product Information -->
+        <!-- ─── SECTION 1: Product Details ─── -->
         <section class="form-card">
 
           <div class="card-heading">
             <div class="heading-icon green">▣</div>
-
             <div>
-              <h2>Product information</h2>
-              <p>Basic details about the product.</p>
+              <h2>Product Details</h2>
+              <p>Basic identification info about the product.</p>
             </div>
           </div>
 
-          <div class="form-grid">
+          <div class="form-grid two-col">
 
+            <!-- Product Name -->
             <div class="field field-full">
               <label for="productName">
-                Product name <span>*</span>
+                Product Name <span>*</span>
               </label>
-
               <input
                 type="text"
                 id="productName"
                 name="productName"
-                placeholder="e.g. Wireless Sensor Module"
+                placeholder="e.g. Paracetamol 500mg Tablet"
                 required
+                autocomplete="off"
               >
             </div>
 
-
-            <div class="field">
-              <label for="sku">
-                SKU <span>*</span>
-              </label>
-
-              <input
-                type="text"
-                id="sku"
-                name="sku"
-                placeholder="e.g. SS-2041"
-                required
-              >
-            </div>
-
-
-            <div class="field">
-              <label for="barcode">
-                Barcode
-              </label>
-
-              <div class="input-action">
-                <input
-                  type="text"
-                  id="barcode"
-                  name="barcode"
-                  placeholder="Scan or enter barcode"
-                >
-
-                <button
-                  type="button"
-                  class="generate-btn"
-                  onclick="generateBarcode()"
-                >
-                  Generate
-                </button>
-              </div>
-
-              <small class="help-text">
-                Leave empty if you want to generate it later.
-              </small>
-            </div>
-
-
+            <!-- Category -->
             <div class="field">
               <label for="categoryId">
                 Category <span>*</span>
               </label>
-
-              <div class="select-action-group">
+              <div class="input-row">
                 <select id="categoryId" name="categoryId" required>
-                  <option value="" selected disabled>
-                    Select Category
-                  </option>
+                  <option value="" disabled selected>Select category</option>
                   <% if (typeof categories !== 'undefined' && categories.length > 0) { %>
                     <% categories.forEach(function(cat) { %>
                       <option value="<%= cat._id %>"><%= cat.name %></option>
                     <% }); %>
                   <% } %>
                 </select>
-
-                <button
-                  type="button"
-                  class="add-inline-btn"
-                  id="openCategoryModalBtn"
-                >
-                  + Add Category
-                </button>
+                <button type="button" class="ghost-btn" id="openCategoryModalBtn">+ Add</button>
               </div>
             </div>
 
-
+            <!-- Supplier -->
             <div class="field">
-              <label for="supplier">
-                Supplier
+              <label for="supplierId">
+                Default Supplier
               </label>
-
-              <select id="supplier" name="supplier">
-                <option value="" selected>Select supplier</option>
-                <option value="Vertex Industrial">Vertex Industrial</option>
-                <option value="Aster Components">Aster Components</option>
-                <option value="North Forge Co.">North Forge Co.</option>
-                <option value="Circuit Supply">Circuit Supply</option>
+              <select id="supplierId" name="supplierId">
+                <option value="">None / Not specified</option>
+                <% if (typeof suppliers !== 'undefined' && suppliers.length > 0) { %>
+                  <% suppliers.forEach(function(sup) { %>
+                    <option value="<%= sup._id %>"><%= sup.name %></option>
+                  <% }); %>
+                <% } %>
               </select>
             </div>
 
-
+            <!-- Description -->
             <div class="field field-full">
-              <label for="description">
-                Description
-              </label>
-
+              <label for="description">Description</label>
               <textarea
                 id="description"
                 name="description"
-                rows="4"
-                placeholder="Write a short description of the product..."
+                rows="3"
+                placeholder="Short description, composition, usage notes..."
               ></textarea>
             </div>
 
@@ -316,115 +252,80 @@
         </section>
 
 
-        <!-- Inventory -->
+        <!-- ─── SECTION 2: Identification ─── -->
         <section class="form-card">
 
           <div class="card-heading">
-            <div class="heading-icon blue">♧</div>
-
+            <div class="heading-icon purple">⊞</div>
             <div>
-              <h2>Inventory</h2>
-              <p>Set the initial stock and reorder settings.</p>
+              <h2>Identification</h2>
+              <p>SKU, barcode and product status.</p>
             </div>
           </div>
 
-          <div class="form-grid three">
+          <div class="form-grid three-col">
 
-
+            <!-- SKU -->
             <div class="field">
-              <label for="unitId">
-                Unit <span>*</span>
-              </label>
+              <label for="sku">SKU</label>
+              <input
+                type="text"
+                id="sku"
+                name="sku"
+                placeholder="Auto-generated if empty"
+                autocomplete="off"
+              >
+              <small class="help-text">Leave blank to auto-generate.</small>
+            </div>
 
-              <div class="select-action-group">
-                <select id="unitId" name="unitId" required>
-                  <option value="" selected disabled>
-                    Select Unit
-                  </option>
-                  <% if (typeof units !== 'undefined' && units.length > 0) { %>
-                    <% units.forEach(function(u) { %>
-                      <option value="<%= u._id %>"><%= u.name %> (<%= u.symbol %>)</option>
-                    <% }); %>
-                  <% } %>
-                </select>
-
-                <button
-                  type="button"
-                  class="add-inline-btn"
-                  id="openUnitModalBtn"
+            <!-- Barcode -->
+            <div class="field">
+              <label for="barcode">Barcode</label>
+              <div class="input-row">
+                <input
+                  type="text"
+                  id="barcode"
+                  name="barcode"
+                  placeholder="Scan or type barcode"
+                  autocomplete="off"
                 >
-                  + Add Unit
-                </button>
+                <button type="button" class="ghost-btn" onclick="generateBarcode()">Generate</button>
               </div>
+              <!-- Live barcode SVG preview -->
+              <div id="barcodePreview" class="barcode-preview" style="display:none;"></div>
             </div>
 
+            <!-- Status -->
             <div class="field">
-              <label for="quantity">
-                Initial Stock / Quantity
-              </label>
-
-              <input
-                type="number"
-                id="quantity"
-                name="quantity"
-                min="0"
-                placeholder="e.g. 50"
-                value="0"
-              >
-            </div>
-
-            <div class="field">
-              <label for="reorderLevel">
-                Reorder level
-              </label>
-
-              <input
-                type="number"
-                id="reorderLevel"
-                name="reorderLevel"
-                min="0"
-                placeholder="e.g. 20"
-              >
-            </div>
-
-            <div class="field">
-              <label for="expiryDate">
-                Expiry date
-              </label>
-
-              <input
-                type="date"
-                id="expiryDate"
-                name="expiryDate"
-              >
+              <label for="status">Status</label>
+              <select id="status" name="status">
+                <option value="active" selected>Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
             </div>
 
           </div>
         </section>
 
 
-        <!-- Pricing -->
+        <!-- ─── SECTION 3: Pricing & Tax ─── -->
         <section class="form-card">
 
           <div class="card-heading">
-            <div class="heading-icon orange">$</div>
-
+            <div class="heading-icon orange">₹</div>
             <div>
-              <h2>Pricing</h2>
-              <p>Set purchase and selling prices.</p>
+              <h2>Pricing &amp; Tax</h2>
+              <p>Purchase price, selling price, and GST rate.</p>
             </div>
           </div>
 
-          <div class="form-grid three">
+          <div class="form-grid three-col">
 
+            <!-- Purchase Price -->
             <div class="field">
-              <label for="costPrice">
-                Cost price
-              </label>
-
+              <label for="costPrice">Purchase / Cost Price</label>
               <div class="money-input">
                 <span>₹</span>
-
                 <input
                   type="number"
                   id="costPrice"
@@ -432,19 +333,18 @@
                   min="0"
                   step="0.01"
                   placeholder="0.00"
+                  oninput="calcMargin()"
                 >
               </div>
             </div>
 
-
+            <!-- Selling Price -->
             <div class="field">
               <label for="sellingPrice">
-                Selling price <span>*</span>
+                Selling Price <span>*</span>
               </label>
-
               <div class="money-input">
                 <span>₹</span>
-
                 <input
                   type="number"
                   id="sellingPrice"
@@ -453,17 +353,25 @@
                   step="0.01"
                   placeholder="0.00"
                   required
+                  oninput="calcMargin()"
                 >
               </div>
+              <!-- Live margin badge -->
+              <div id="marginBadge" class="margin-badge" style="display:none;"></div>
             </div>
 
-
+            <!-- GST -->
             <div class="field">
-              <label for="tax">
-                Tax / GST
-              </label>
-
-              <div class="suffix-input">
+              <label>GST / Tax Rate</label>
+              <!-- Quick preset chips -->
+              <div class="gst-chips">
+                <button type="button" class="gst-chip" data-val="0">0%</button>
+                <button type="button" class="gst-chip" data-val="5">5%</button>
+                <button type="button" class="gst-chip" data-val="12">12%</button>
+                <button type="button" class="gst-chip active" data-val="18">18%</button>
+                <button type="button" class="gst-chip" data-val="28">28%</button>
+              </div>
+              <div class="suffix-input" style="margin-top:8px;">
                 <input
                   type="number"
                   id="tax"
@@ -471,6 +379,7 @@
                   min="0"
                   max="100"
                   step="0.01"
+                  value="18"
                   placeholder="18"
                 >
                 <span>%</span>
@@ -481,18 +390,52 @@
         </section>
 
 
-        <!-- Form actions -->
+        <!-- ─── SECTION 4: Stock & Reorder ─── -->
+        <section class="form-card">
+
+          <div class="card-heading">
+            <div class="heading-icon blue">♧</div>
+            <div>
+              <h2>Stock &amp; Reorder Settings</h2>
+              <p>Reorder level for low-stock alerts. Stock is managed via Purchases.</p>
+            </div>
+          </div>
+
+          <div class="form-grid two-col">
+
+            <!-- Reorder Level -->
+            <div class="field">
+              <label for="reorderLevel">Reorder Level (Min Stock Alert)</label>
+              <input
+                type="number"
+                id="reorderLevel"
+                name="reorderLevel"
+                min="0"
+                placeholder="e.g. 20"
+              >
+              <small class="help-text">Alert is triggered when stock falls below this.</small>
+            </div>
+
+            <!-- Note about initial stock -->
+            <div class="field info-note">
+              <div class="info-note-icon">ℹ</div>
+              <div>
+                <strong>Initial stock is 0</strong>
+                <p>Stock quantities are managed exclusively through <a href="/purchases/new">Purchase Entries</a>. This keeps inventory accurate and fully traceable.</p>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+
+        <!-- ─── Form Actions ─── -->
         <div class="form-actions">
-
-          <a href="/products" class="cancel-btn">
-            Cancel
-          </a>
-
-          <button type="submit" class="save-btn">
+          <a href="/inventory" class="cancel-btn">Cancel</a>
+          <button type="submit" class="save-btn" id="submitBtn">
             <span>✓</span>
             Save Product
           </button>
-
         </div>
 
       </form>
@@ -510,7 +453,7 @@
       <h3 id="categoryModalTitle">
         <span>▣</span> Add New Category
       </h3>
-      <button type="button" class="modal-close-btn" id="closeCategoryModalBtn" aria-label="Close modal">&times;</button>
+      <button type="button" class="modal-close-btn" id="closeCategoryModalBtn" aria-label="Close">&times;</button>
     </div>
 
     <form id="addCategoryForm" onsubmit="handleCategorySubmit(event)">
@@ -518,36 +461,18 @@
         <div class="modal-error" id="categoryModalError"></div>
 
         <div class="field">
-          <label for="newCategoryName">
-            Category Name <span>*</span>
-          </label>
-          <input
-            type="text"
-            id="newCategoryName"
-            name="name"
-            placeholder="e.g. Electrical Tools"
-            required
-            autocomplete="off"
-          >
+          <label for="newCategoryName">Category Name <span>*</span></label>
+          <input type="text" id="newCategoryName" name="name" placeholder="e.g. Antibiotics" required autocomplete="off">
         </div>
 
         <div class="field">
-          <label for="newCategoryDescription">
-            Description
-          </label>
-          <textarea
-            id="newCategoryDescription"
-            name="description"
-            rows="3"
-            placeholder="Short category description (optional)..."
-          ></textarea>
+          <label for="newCategoryDescription">Description</label>
+          <textarea id="newCategoryDescription" name="description" rows="3" placeholder="Short description (optional)..."></textarea>
         </div>
       </div>
 
       <div class="modal-footer">
-        <button type="button" class="cancel-btn" id="cancelCategoryBtn">
-          Cancel
-        </button>
+        <button type="button" class="cancel-btn" id="cancelCategoryBtn">Cancel</button>
         <button type="submit" class="save-btn" id="saveCategoryBtn">
           <span class="btn-text">Save Category</span>
         </button>
@@ -556,266 +481,188 @@
   </div>
 </div>
 
-<!-- ================= ADD UNIT MODAL ================= -->
-<div class="modal-overlay" id="unitModal" role="dialog" aria-modal="true" aria-labelledby="unitModalTitle">
-  <div class="modal-card">
-    <div class="modal-header">
-      <h3 id="unitModalTitle">
-        <span>♧</span> Add New Unit
-      </h3>
-      <button type="button" class="modal-close-btn" id="closeUnitModalBtn" aria-label="Close modal">&times;</button>
-    </div>
-
-    <form id="addUnitForm" onsubmit="handleUnitSubmit(event)">
-      <div class="modal-body">
-        <div class="modal-error" id="unitModalError"></div>
-
-        <div class="field">
-          <label for="newUnitName">
-            Unit Name <span>*</span>
-          </label>
-          <input
-            type="text"
-            id="newUnitName"
-            name="name"
-            placeholder="e.g. Kilogram"
-            required
-            autocomplete="off"
-          >
-        </div>
-
-        <div class="field">
-          <label for="newUnitSymbol">
-            Unit Symbol <span>*</span>
-          </label>
-          <input
-            type="text"
-            id="newUnitSymbol"
-            name="symbol"
-            placeholder="e.g. kg"
-            required
-            autocomplete="off"
-          >
-        </div>
-      </div>
-
-      <div class="modal-footer">
-        <button type="button" class="cancel-btn" id="cancelUnitBtn">
-          Cancel
-        </button>
-        <button type="submit" class="save-btn" id="saveUnitBtn">
-          <span class="btn-text">Save Unit</span>
-        </button>
-      </div>
-    </form>
-  </div>
-</div>
 
 <script>
+  /* ===================================================
+     BARCODE GENERATOR
+  =================================================== */
   function generateBarcode() {
-    const barcode = document.getElementById("barcode");
-    if (barcode.value.trim() !== "") {
+    const input = document.getElementById('barcode');
+    // Only generate if empty
+    if (input.value.trim() !== '') {
+      showBarcodePreview(input.value.trim());
       return;
     }
-    const randomBarcode =
-      "890" + Math.floor(100000000 + Math.random() * 900000000);
-    barcode.value = randomBarcode;
+    const code = '890' + Math.floor(100000000 + Math.random() * 900000000);
+    input.value = code;
+    showBarcodePreview(code);
   }
 
-  // DOM Elements
-  const categorySelect = document.getElementById("categoryId");
-  const unitSelect = document.getElementById("unitId");
+  // Simple EAN-like preview using thin/thick bars (visual only)
+  function showBarcodePreview(code) {
+    const preview = document.getElementById('barcodePreview');
+    if (!code) { preview.style.display = 'none'; return; }
 
-  const categoryModal = document.getElementById("categoryModal");
-  const openCategoryModalBtn = document.getElementById("openCategoryModalBtn");
-  const closeCategoryModalBtn = document.getElementById("closeCategoryModalBtn");
-  const cancelCategoryBtn = document.getElementById("cancelCategoryBtn");
-  const categoryModalError = document.getElementById("categoryModalError");
-  const newCategoryName = document.getElementById("newCategoryName");
-  const newCategoryDescription = document.getElementById("newCategoryDescription");
-  const saveCategoryBtn = document.getElementById("saveCategoryBtn");
+    // Build a simple visual barcode from character codes
+    let bars = '';
+    for (let i = 0; i < code.length; i++) {
+      const w = (code.charCodeAt(i) % 3) + 1;
+      const isWhite = i % 2 === 1;
+      bars += `<span style="
+        display:inline-block;
+        width:${w * 3}px;
+        height:48px;
+        background:${isWhite ? '#fff' : '#1a2940'};
+      "></span>`;
+    }
 
-  const unitModal = document.getElementById("unitModal");
-  const openUnitModalBtn = document.getElementById("openUnitModalBtn");
-  const closeUnitModalBtn = document.getElementById("closeUnitModalBtn");
-  const cancelUnitBtn = document.getElementById("cancelUnitBtn");
-  const unitModalError = document.getElementById("unitModalError");
-  const newUnitName = document.getElementById("newUnitName");
-  const newUnitSymbol = document.getElementById("newUnitSymbol");
-  const saveUnitBtn = document.getElementById("saveUnitBtn");
+    preview.innerHTML = `
+      <div style="background:#fff;padding:10px 14px 6px;border-radius:6px;border:1px solid #e0e8f0;display:inline-flex;flex-direction:column;align-items:center;gap:4px;">
+        <div style="display:flex;align-items:flex-end;gap:1px;">${bars}</div>
+        <div style="font-size:10px;color:#555;letter-spacing:2px;font-family:monospace;">${code}</div>
+      </div>`;
+    preview.style.display = 'block';
+  }
 
-  // Category Modal Handlers
+  // Auto-preview if barcode field is filled on load
+  document.getElementById('barcode').addEventListener('input', function () {
+    if (this.value.trim()) showBarcodePreview(this.value.trim());
+    else document.getElementById('barcodePreview').style.display = 'none';
+  });
+
+
+  /* ===================================================
+     LIVE MARGIN BADGE
+  =================================================== */
+  function calcMargin() {
+    const cost   = parseFloat(document.getElementById('costPrice').value) || 0;
+    const sell   = parseFloat(document.getElementById('sellingPrice').value) || 0;
+    const badge  = document.getElementById('marginBadge');
+
+    if (sell <= 0) { badge.style.display = 'none'; return; }
+
+    const margin = ((sell - cost) / sell * 100).toFixed(1);
+    const profit = (sell - cost).toFixed(2);
+    const isPos  = (sell - cost) >= 0;
+
+    badge.textContent = `Margin: ${margin}%  |  Profit: ₹${profit}`;
+    badge.className   = 'margin-badge ' + (isPos ? 'margin-pos' : 'margin-neg');
+    badge.style.display = 'inline-flex';
+  }
+
+
+  /* ===================================================
+     GST PRESET CHIPS
+  =================================================== */
+  const chips  = document.querySelectorAll('.gst-chip');
+  const gstInput = document.getElementById('tax');
+
+  chips.forEach(chip => {
+    chip.addEventListener('click', function () {
+      chips.forEach(c => c.classList.remove('active'));
+      this.classList.add('active');
+      gstInput.value = this.dataset.val;
+    });
+  });
+
+  // Sync chip highlight if user types in the input
+  gstInput.addEventListener('input', function () {
+    chips.forEach(c => {
+      c.classList.toggle('active', c.dataset.val === this.value);
+    });
+  });
+
+
+  /* ===================================================
+     CATEGORY MODAL
+  =================================================== */
+  const categorySelect         = document.getElementById('categoryId');
+  const categoryModal          = document.getElementById('categoryModal');
+  const openCategoryModalBtn   = document.getElementById('openCategoryModalBtn');
+  const closeCategoryModalBtn  = document.getElementById('closeCategoryModalBtn');
+  const cancelCategoryBtn      = document.getElementById('cancelCategoryBtn');
+  const categoryModalError     = document.getElementById('categoryModalError');
+  const newCategoryName        = document.getElementById('newCategoryName');
+  const newCategoryDescription = document.getElementById('newCategoryDescription');
+  const saveCategoryBtn        = document.getElementById('saveCategoryBtn');
+
   function openCategoryModal() {
-    categoryModalError.textContent = "";
-    categoryModalError.classList.remove("visible");
-    newCategoryName.value = "";
-    newCategoryDescription.value = "";
-    categoryModal.classList.add("active");
-    setTimeout(() => newCategoryName.focus(), 50);
+    categoryModalError.textContent = '';
+    categoryModalError.classList.remove('visible');
+    newCategoryName.value = '';
+    newCategoryDescription.value = '';
+    categoryModal.classList.add('active');
+    setTimeout(() => newCategoryName.focus(), 60);
   }
 
   function closeCategoryModal() {
-    categoryModal.classList.remove("active");
+    categoryModal.classList.remove('active');
   }
 
-  openCategoryModalBtn.addEventListener("click", openCategoryModal);
-  closeCategoryModalBtn.addEventListener("click", closeCategoryModal);
-  cancelCategoryBtn.addEventListener("click", closeCategoryModal);
+  openCategoryModalBtn.addEventListener('click', openCategoryModal);
+  closeCategoryModalBtn.addEventListener('click', closeCategoryModal);
+  cancelCategoryBtn.addEventListener('click', closeCategoryModal);
 
-  // Unit Modal Handlers
-  function openUnitModal() {
-    unitModalError.textContent = "";
-    unitModalError.classList.remove("visible");
-    newUnitName.value = "";
-    newUnitSymbol.value = "";
-    unitModal.classList.add("active");
-    setTimeout(() => newUnitName.focus(), 50);
-  }
-
-  function closeUnitModal() {
-    unitModal.classList.remove("active");
-  }
-
-  openUnitModalBtn.addEventListener("click", openUnitModal);
-  closeUnitModalBtn.addEventListener("click", closeUnitModal);
-  cancelUnitBtn.addEventListener("click", closeUnitModal);
-
-  // Close modals on clicking overlay outside card
-  categoryModal.addEventListener("click", (e) => {
+  categoryModal.addEventListener('click', e => {
     if (e.target === categoryModal) closeCategoryModal();
   });
 
-  unitModal.addEventListener("click", (e) => {
-    if (e.target === unitModal) closeUnitModal();
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeCategoryModal();
   });
 
-  // Close modals on Escape key
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") {
-      closeCategoryModal();
-      closeUnitModal();
-    }
-  });
-
-  // Handle Add Category submission
   async function handleCategorySubmit(e) {
     e.preventDefault();
-    const name = newCategoryName.value.trim();
+    const name        = newCategoryName.value.trim();
     const description = newCategoryDescription.value.trim();
 
     if (!name) {
-      categoryModalError.textContent = "Category name is required.";
-      categoryModalError.classList.add("visible");
+      categoryModalError.textContent = 'Category name is required.';
+      categoryModalError.classList.add('visible');
       newCategoryName.focus();
       return;
     }
 
-    categoryModalError.textContent = "";
-    categoryModalError.classList.remove("visible");
+    categoryModalError.textContent = '';
+    categoryModalError.classList.remove('visible');
 
-    // Loading state
-    const originalBtnHtml = saveCategoryBtn.innerHTML;
+    const origHtml = saveCategoryBtn.innerHTML;
     saveCategoryBtn.disabled = true;
     saveCategoryBtn.innerHTML = '<span class="btn-spinner"></span> Saving...';
 
     try {
-      const response = await fetch("/categories", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json"
-        },
+      const res  = await fetch('/categories', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
         body: JSON.stringify({ name, description })
       });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Failed to create category');
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Failed to create category");
-      }
-
-      const category = data.category;
-
-      // Add to select and select it
-      const option = new Option(category.name, category._id);
+      const option = new Option(data.category.name, data.category._id);
       categorySelect.add(option);
-      categorySelect.value = category._id;
+      categorySelect.value = data.category._id;
 
       closeCategoryModal();
     } catch (err) {
-      categoryModalError.textContent = err.message || "Error saving category";
-      categoryModalError.classList.add("visible");
+      categoryModalError.textContent = err.message || 'Error saving category';
+      categoryModalError.classList.add('visible');
     } finally {
       saveCategoryBtn.disabled = false;
-      saveCategoryBtn.innerHTML = originalBtnHtml;
+      saveCategoryBtn.innerHTML = origHtml;
     }
   }
 
-  // Handle Add Unit submission
-  async function handleUnitSubmit(e) {
-    e.preventDefault();
-    const name = newUnitName.value.trim();
-    const symbol = newUnitSymbol.value.trim();
 
-    if (!name) {
-      unitModalError.textContent = "Unit name is required.";
-      unitModalError.classList.add("visible");
-      newUnitName.focus();
-      return;
-    }
-
-    if (!symbol) {
-      unitModalError.textContent = "Unit symbol is required.";
-      unitModalError.classList.add("visible");
-      newUnitSymbol.focus();
-      return;
-    }
-
-    unitModalError.textContent = "";
-    unitModalError.classList.remove("visible");
-
-    // Loading state
-    const originalBtnHtml = saveUnitBtn.innerHTML;
-    saveUnitBtn.disabled = true;
-    saveUnitBtn.innerHTML = '<span class="btn-spinner"></span> Saving...';
-
-    try {
-      const response = await fetch("/units", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json"
-        },
-        body: JSON.stringify({ name, symbol })
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Failed to create unit");
-      }
-
-      const unit = data.unit;
-
-      // Add to select and select it
-      const option = new Option(
-        `${unit.name} (${unit.symbol})`,
-        unit._id
-      );
-      unitSelect.add(option);
-      unitSelect.value = unit._id;
-
-      closeUnitModal();
-    } catch (err) {
-      unitModalError.textContent = err.message || "Error saving unit";
-      unitModalError.classList.add("visible");
-    } finally {
-      saveUnitBtn.disabled = false;
-      saveUnitBtn.innerHTML = originalBtnHtml;
-    }
-  }
+  /* ===================================================
+     FORM SUBMIT — LOADING STATE
+  =================================================== */
+  document.getElementById('productForm').addEventListener('submit', function () {
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="btn-spinner"></span> Saving...';
+  });
 </script>
 
 </body>
 </html>
-

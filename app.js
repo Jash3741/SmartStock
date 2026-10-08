@@ -60,10 +60,8 @@ app.get("/:id/user/profile", (req, res) => {
 });
 
 const categoryRouter = require("./routes/category.routes.js");
-const unitRouter = require("./routes/unit.routes.js");
 
 app.use("/categories", categoryRouter);
-app.use("/units", unitRouter);
 
 const productController = require("./controllers/product.controller.js");
 
@@ -75,6 +73,18 @@ app.get("/:id/inventory", productController.inventory);
 app.use("/products", productRouter);
 app.use("/:id/products", productRouter);
 
-app.listen(4000, () => {
-  console.log("Server Listing On Port 4000");
+// Purchase routes (handles /purchases, /purchases/new, /:id/purchases, etc.)
+const purchaseRouter = require("./routes/purchase.routes.js");
+app.use("/purchases", purchaseRouter);
+app.use("/:id/purchases", purchaseRouter);
+
+// Sales routes (handles /sales, /sales/new, /:id/sales, etc.)
+const salesRouter = require("./routes/sales.routes.js");
+app.use("/sales", salesRouter);
+app.use("/:id/sales", salesRouter);
+
+
+const port = 4000;
+app.listen(port, () => {
+  console.log(`http://localhost:4000/login`);
 });

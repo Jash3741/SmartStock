@@ -47,14 +47,37 @@ const saleSchema = new mongoose.Schema(
 
     paymentMethod: {
       type: String,
-      enum: ["cash", "upi", "card", "bank"],
+      enum: ["cash", "upi", "card", "bank", "Cash", "UPI", "Card", "Bank"],
       default: "cash",
     },
 
     paymentStatus: {
       type: String,
-      enum: ["paid", "partial", "pending"],
+      enum: ["paid", "partial", "pending", "Paid", "Partial", "Pending"],
       default: "paid",
+    },
+
+    paidAmount: {
+      type: Number,
+      min: 0,
+      default: 0,
+    },
+
+    remainingAmount: {
+      type: Number,
+      min: 0,
+      default: 0,
+    },
+
+    customerName: {
+      type: String,
+      trim: true,
+      default: "Walk-in Customer",
+    },
+
+    notes: {
+      type: String,
+      trim: true,
     },
 
     createdBy: {

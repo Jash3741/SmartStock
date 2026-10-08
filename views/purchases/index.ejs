@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartStock - Purchase History</title>
+  <link rel="stylesheet" href="/css/purchase.css">
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ================= SIDEBAR ================= -->
+  <aside class="sidebar">
+
+    <a href="/<%= User._id %>/dashboard" class="brand">
+      <span class="brand-mark">
+        <i></i><i></i><i></i>
+      </span>
+      <span>Smart<span>Stock</span></span>
+    </a>
+
+    <button class="workspace">
+      <span class="workspace-icon">▣</span>
+      <span class="workspace-text">
+        <strong>Northline Ops</strong>
+        <small>4 locations</small>
+      </span>
+      <span class="workspace-arrow">⌄</span>
+    </button>
+
+    <nav class="navigation">
+      <div class="nav-title">WORKSPACE</div>
+
+      <a href="/<%= User._id %>/dashboard" class="nav-item">
+        <span>▦</span>
+        Dashboard
+      </a>
+
+      <a href="/products/add" class="nav-item">
+        <span>⊕</span>
+        Add Product
+      </a>
+
+      <a href="/inventory" class="nav-item">
+        <span>♧</span>
+        Inventory
+      </a>
+
+      <a href="/purchases" class="nav-item active">
+        <span>🛒</span>
+        Purchases
+      </a>
+
+      <a href="/sales" class="nav-item">
+        <span>$</span>
+        Sales
+      </a>
+
+      <a href="/reports" class="nav-item">
+        <span>▥</span>
+        Reports
+      </a>
+
+      <div class="nav-title manage-title">MANAGE</div>
+
+      <a href="/suppliers" class="nav-item">
+        <span>▱</span>
+        Suppliers
+      </a>
+
+      <a href="/locations" class="nav-item">
+        <span>⌖</span>
+        Locations
+      </a>
+
+      <a href="/settings" class="nav-item">
+        <span>⚙</span>
+        Settings
+      </a>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <div class="health-card">
+        <div class="health-top">
+          <span>Inventory health</span>
+          <strong>92%</strong>
+        </div>
+        <div class="health-bar">
+          <span></span>
+        </div>
+        <small>Real-time Inventory sync active</small>
+      </div>
+
+      <a href="/<%= User._id %>/user/profile" class="user">
+        <div class="avatar">
+          <%= typeof reqUser !== 'undefined' && reqUser?.username
+              ? reqUser.username.substring(0, 2).toUpperCase()
+              : 'TM' %>
+        </div>
+        <div class="user-info">
+          <strong><%= typeof reqUser !== 'undefined' && reqUser?.username ? reqUser.username : 'Admin' %></strong>
+          <small>Verified User</small>
+        </div>
+      </a>
+    </div>
+
+  </aside>
+
+  <!-- ================= MAIN CONTENT ================= -->
+  <main class="main">
+
+    <!-- Topbar -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <h2 class="topbar-title">Purchase History</h2>
+        <span class="badge-tag">Invoices</span>
+      </div>
+      <div class="topbar-actions">
+        <a href="/purchases/new" class="btn btn-primary btn-sm">＋ New Purchase</a>
+      </div>
+    </header>
+
+    <div class="content-container">
+
+      <!-- Page Header -->
+      <div class="page-header-row">
+        <div class="header-title-block">
+          <h1>Purchase Orders & Inward Invoices</h1>
+          <p>Review completed inward stock entries, supplier invoices, and payment statuses.</p>
+        </div>
+        <div class="header-buttons">
+          <a href="/purchases/new" class="btn btn-primary">
+            <span>＋</span> New Purchase
+          </a>
+        </div>
+      </div>
+
+      <!-- KPI Metrics Cards -->
+      <section class="stats-grid">
+        <article class="stat-card">
+          <span class="stat-label">Total Purchases</span>
+          <span class="stat-value"><%= stats.totalPurchases %></span>
+          <span class="stat-desc">All recorded supplier invoices</span>
+        </article>
+
+        <article class="stat-card">
+          <span class="stat-label">Total Inward Value</span>
+          <span class="stat-value" style="color: var(--green-dark);">
+            ₹<%= Number(stats.totalSpent || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>
+          </span>
+          <span class="stat-desc">Cumulative purchase investment</span>
+        </article>
+
+        <article class="stat-card">
+          <span class="stat-label">Pending / Partial Payments</span>
+          <span class="stat-value" style="color: var(--orange);">
+            <%= stats.pendingPaymentCount %>
+          </span>
+          <span class="stat-desc">Invoices requiring settlement</span>
+        </article>
+      </section>
+
+      <!-- Search & Filtering Toolbar -->
+      <div class="toolbar-card">
+        <form method="GET" action="/purchases" class="search-box">
+          <span>🔍</span>
+          <input 
+            type="search" 
+            name="search" 
+            placeholder="Search by invoice number or supplier..." 
+            value="<%= search || '' %>"
+          />
+        </form>
+
+        <div class="filter-group">
+          <form method="GET" action="/purchases" id="filterForm">
+            <% if (search) { %>
+              <input type="hidden" name="search" value="<%= search %>" />
+            <% } %>
+            <select name="status" class="select-filter" onchange="document.getElementById('filterForm').submit()">
+              <option value="">All Payment Statuses</option>
+              <option value="Paid" <%= statusFilter === 'Paid' ? 'selected' : '' %>>Paid</option>
+              <option value="Partial" <%= statusFilter === 'Partial' ? 'selected' : '' %>>Partial</option>
+              <option value="Pending" <%= statusFilter === 'Pending' ? 'selected' : '' %>>Pending</option>
+            </select>
+          </form>
+
+          <% if (search || statusFilter) { %>
+            <a href="/purchases" class="btn btn-secondary btn-sm">Clear Filter</a>
+          <% } %>
+        </div>
+      </div>
+
+      <!-- Purchases History Table -->
+      <div class="table-card">
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Invoice Number</th>
+                <th>Supplier</th>
+                <th>Purchase Date</th>
+                <th>Items / Qty</th>
+                <th>Subtotal</th>
+                <th>GST</th>
+                <th>Discount</th>
+                <th>Grand Total</th>
+                <th>Payment Method</th>
+                <th>Payment Status</th>
+                <th style="text-align: center;">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (purchases && purchases.length > 0) { %>
+                <% purchases.forEach(purchase => { %>
+                  <tr>
+                    <td>
+                      <a href="/purchases/<%= purchase._id %>" style="font-weight: 700; color: var(--navy-light);">
+                        <%= purchase.invoiceNumber %>
+                      </a>
+                    </td>
+
+                    <td>
+                      <div>
+                        <strong><%= purchase.supplier ? purchase.supplier.name : 'Unknown' %></strong>
+                      </div>
+                      <small style="color: var(--muted); font-size: 11px;">
+                        <%= purchase.supplier ? purchase.supplier.phone : '' %>
+                      </small>
+                    </td>
+
+                    <td>
+                      <%= new Date(purchase.purchaseDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) %>
+                    </td>
+
+                    <td>
+                      <span class="badge badge-active">
+                        <%= purchase.itemCount || 1 %> items (<%= purchase.totalQuantity || 0 %> units)
+                      </span>
+                    </td>
+
+                    <td>₹<%= Number(purchase.subtotal || 0).toFixed(2) %></td>
+                    <td>₹<%= Number(purchase.gstAmount || 0).toFixed(2) %></td>
+                    <td>₹<%= Number(purchase.discount || 0).toFixed(2) %></td>
+
+                    <td style="font-weight: 700; color: var(--text-dark);">
+                      ₹<%= Number(purchase.grandTotal || 0).toFixed(2) %>
+                    </td>
+
+                    <td>
+                      <span style="font-size: 12px; font-weight: 500;">
+                        <%= purchase.paymentMethod || 'Cash' %>
+                      </span>
+                    </td>
+
+                    <td>
+                      <% if (purchase.paymentStatus === 'Paid') { %>
+                        <span class="badge badge-paid">Paid</span>
+                      <% } else if (purchase.paymentStatus === 'Partial') { %>
+                        <span class="badge badge-partial">Partial</span>
+                      <% } else { %>
+                        <span class="badge badge-pending">Pending</span>
+                      <% } %>
+                    </td>
+
+                    <td style="text-align: center;">
+                      <div style="display: flex; gap: 6px; justify-content: center;">
+                        <a href="/purchases/<%= purchase._id %>" class="btn btn-secondary btn-sm" title="View Invoice">
+                          👁 View
+                        </a>
+                        <button 
+                          type="button" 
+                          class="btn btn-secondary btn-sm" 
+                          style="opacity: 0.5; cursor: not-allowed;" 
+                          title="Editing locked to protect inventory and batch history" 
+                          onclick="alert('Direct edit/deletion of inward purchases is locked to preserve inventory stock integrity and batch audit logs.')">
+                          ✎ Edit
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                <% }) %>
+              <% } else { %>
+                <tr>
+                  <td colspan="11" style="text-align: center; padding: 48px 24px; color: var(--muted);">
+                    <div style="font-size: 32px; margin-bottom: 12px;">🛒</div>
+                    <h3 style="margin: 0 0 6px 0; color: var(--text-dark);">No purchases recorded yet</h3>
+                    <p style="margin: 0 0 16px 0; font-size: 13px;">Create your first purchase entry to add inward stock and batch information.</p>
+                    <a href="/purchases/new" class="btn btn-primary">＋ Create New Purchase</a>
+                  </td>
+                </tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+</div>
+
+</body>
+</html>
+

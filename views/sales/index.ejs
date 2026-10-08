@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartStock - Sales History</title>
+  <link rel="stylesheet" href="/css/sale.css">
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ================= SIDEBAR ================= -->
+  <aside class="sidebar">
+
+    <a href="/<%= User._id %>/dashboard" class="brand">
+      <span class="brand-mark">
+        <i></i><i></i><i></i>
+      </span>
+      <span>Smart<span>Stock</span></span>
+    </a>
+
+    <button class="workspace">
+      <span class="workspace-icon">▣</span>
+      <span class="workspace-text">
+        <strong>Northline Ops</strong>
+        <small>4 locations</small>
+      </span>
+      <span class="workspace-arrow">⌄</span>
+    </button>
+
+    <nav class="navigation">
+      <div class="nav-title">WORKSPACE</div>
+
+      <a href="/<%= User._id %>/dashboard" class="nav-item">
+        <span>▦</span>
+        Dashboard
+      </a>
+
+      <a href="/products/add" class="nav-item">
+        <span>⊕</span>
+        Add Product
+      </a>
+
+      <a href="/inventory" class="nav-item">
+        <span>♧</span>
+        Inventory
+      </a>
+
+      <a href="/purchases" class="nav-item">
+        <span>🛒</span>
+        Purchases
+      </a>
+
+      <a href="/sales" class="nav-item active">
+        <span>$</span>
+        Sales & POS
+      </a>
+
+      <a href="/reports" class="nav-item">
+        <span>▥</span>
+        Reports
+      </a>
+
+      <div class="nav-title manage-title">MANAGE</div>
+
+      <a href="/suppliers" class="nav-item">
+        <span>▱</span>
+        Suppliers
+      </a>
+
+      <a href="/locations" class="nav-item">
+        <span>⌖</span>
+        Locations
+      </a>
+
+      <a href="/settings" class="nav-item">
+        <span>⚙</span>
+        Settings
+      </a>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <div class="health-card">
+        <div class="health-top">
+          <span>Sales Terminal</span>
+          <strong>Active</strong>
+        </div>
+        <div class="health-bar">
+          <span></span>
+        </div>
+        <small>Real-time revenue tracking active</small>
+      </div>
+
+      <a href="/<%= User._id %>/user/profile" class="user">
+        <div class="avatar">
+          <%= typeof reqUser !== 'undefined' && reqUser?.username
+              ? reqUser.username.substring(0, 2).toUpperCase()
+              : 'TM' %>
+        </div>
+        <div class="user-info">
+          <strong><%= typeof reqUser !== 'undefined' && reqUser?.username ? reqUser.username : 'Admin' %></strong>
+          <small>Verified User</small>
+        </div>
+      </a>
+    </div>
+
+  </aside>
+
+  <!-- ================= MAIN CONTENT ================= -->
+  <main class="main">
+
+    <!-- Topbar -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <h2 class="topbar-title">Sales Management</h2>
+        <span class="badge-tag">Billing Records</span>
+      </div>
+      <div class="topbar-actions">
+        <a href="/sales/new" class="btn btn-primary btn-sm">＋ New Sale / POS</a>
+      </div>
+    </header>
+
+    <div class="content-container">
+
+      <!-- Page Header -->
+      <div class="page-header-row">
+        <div class="header-title-block">
+          <h1>Sales History & Invoices</h1>
+          <p>Monitor transactions, customer invoices, revenue, and gross profit margins.</p>
+        </div>
+        <div class="header-buttons">
+          <a href="/sales/new" class="btn btn-primary">
+            <span>＋</span> Create New Bill
+          </a>
+        </div>
+      </div>
+
+      <!-- KPI Metrics Cards -->
+      <section class="stats-grid">
+        <article class="stat-card">
+          <span class="stat-label">Total Bills / Sales</span>
+          <span class="stat-value"><%= stats.totalSalesCount %></span>
+          <span class="stat-desc">Completed customer invoices</span>
+        </article>
+
+        <article class="stat-card">
+          <span class="stat-label">Total Revenue</span>
+          <span class="stat-value" style="color: var(--green-dark);">
+            ₹<%= Number(stats.totalRevenue || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>
+          </span>
+          <span class="stat-desc">Cumulative gross sales value</span>
+        </article>
+
+        <article class="stat-card">
+          <span class="stat-label">Total Gross Profit</span>
+          <span class="stat-value" style="color: var(--blue);">
+            ₹<%= Number(stats.totalProfit || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>
+          </span>
+          <span class="stat-desc">Based on actual batch purchase cost</span>
+        </article>
+
+        <article class="stat-card">
+          <span class="stat-label">Pending / Partial Invoices</span>
+          <span class="stat-value" style="color: var(--orange);">
+            <%= stats.pendingCount %>
+          </span>
+          <span class="stat-desc">Invoices with remaining balance</span>
+        </article>
+      </section>
+
+      <!-- Filter Toolbar -->
+      <div class="form-card" style="padding: 14px 18px; margin-bottom: 20px;">
+        <form method="GET" action="/sales" style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+          <!-- Search box -->
+          <div style="flex: 1; min-width: 220px;">
+            <input 
+              type="search" 
+              name="search" 
+              class="form-control" 
+              placeholder="Search by invoice #, customer name or phone..." 
+              value="<%= search || '' %>" 
+            />
+          </div>
+
+          <!-- Status Filter -->
+          <div style="min-width: 150px;">
+            <select name="status" class="form-control">
+              <option value="">All Statuses</option>
+              <option value="Paid" <%= statusFilter.toLowerCase() === 'paid' ? 'selected' : '' %>>Paid</option>
+              <option value="Partial" <%= statusFilter.toLowerCase() === 'partial' ? 'selected' : '' %>>Partial</option>
+              <option value="Pending" <%= statusFilter.toLowerCase() === 'pending' ? 'selected' : '' %>>Pending</option>
+            </select>
+          </div>
+
+          <!-- Start Date -->
+          <div>
+            <input 
+              type="date" 
+              name="startDate" 
+              class="form-control" 
+              value="<%= startDate || '' %>" 
+              title="Start Date" 
+            />
+          </div>
+
+          <!-- End Date -->
+          <div>
+            <input 
+              type="date" 
+              name="endDate" 
+              class="form-control" 
+              value="<%= endDate || '' %>" 
+              title="End Date" 
+            />
+          </div>
+
+          <button type="submit" class="btn btn-secondary">Filter</button>
+          <% if (search || statusFilter || startDate || endDate) { %>
+            <a href="/sales" class="btn btn-secondary btn-sm">Clear</a>
+          <% } %>
+        </form>
+      </div>
+
+      <!-- Sales Table -->
+      <div class="form-card" style="padding: 0; overflow: hidden;">
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Invoice Number</th>
+                <th>Customer</th>
+                <th>Sale Date</th>
+                <th>Items / Units</th>
+                <th>Grand Total</th>
+                <th>Payment Method</th>
+                <th>Payment Status</th>
+                <th>Billed By</th>
+                <th style="text-align: center;">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (sales && sales.length > 0) { %>
+                <% sales.forEach(sale => { %>
+                  <tr>
+                    <td>
+                      <a href="/sales/<%= sale._id %>" style="font-weight: 700; color: var(--navy);">
+                        <%= sale.invoiceNumber %>
+                      </a>
+                    </td>
+
+                    <td>
+                      <strong><%= sale.customer ? sale.customer.name : (sale.customerName || 'Walk-in Customer') %></strong>
+                      <% if (sale.customer && sale.customer.phone) { %>
+                        <small style="color: var(--muted); display: block; font-size: 11px;"><%= sale.customer.phone %></small>
+                      <% } %>
+                    </td>
+
+                    <td>
+                      <%= new Date(sale.saleDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) %>
+                    </td>
+
+                    <td>
+                      <span class="badge badge-fefo">
+                        <%= sale.itemCount || 1 %> items (<%= sale.totalUnits || 0 %> units)
+                      </span>
+                    </td>
+
+                    <td style="font-weight: 700; color: var(--text-dark);">
+                      ₹<%= Number(sale.grandTotal || 0).toFixed(2) %>
+                    </td>
+
+                    <td>
+                      <span style="font-size: 12px; font-weight: 500; text-transform: uppercase;">
+                        <%= sale.paymentMethod || 'cash' %>
+                      </span>
+                    </td>
+
+                    <td>
+                      <% const pStatus = (sale.paymentStatus || 'paid').toLowerCase(); %>
+                      <% if (pStatus === 'paid') { %>
+                        <span class="badge badge-paid">PAID</span>
+                      <% } else if (pStatus === 'partial') { %>
+                        <span class="badge badge-partial">PARTIAL</span>
+                      <% } else { %>
+                        <span class="badge badge-pending">PENDING</span>
+                      <% } %>
+                    </td>
+
+                    <td>
+                      <small style="color: var(--muted);">
+                        <%= sale.createdBy ? sale.createdBy.username : 'System' %>
+                      </small>
+                    </td>
+
+                    <td style="text-align: center;">
+                      <div style="display: flex; gap: 6px; justify-content: center;">
+                        <a href="/sales/<%= sale._id %>" class="btn btn-secondary btn-sm" title="View Invoice">
+                          👁 View
+                        </a>
+                        <a href="/sales/<%= sale._id %>/pdf" class="btn btn-secondary btn-sm" target="_blank" title="Download PDF Invoice">
+                          📄 PDF
+                        </a>
+                      </div>
+                    </td>
+                  </tr>
+                <% }) %>
+              <% } else { %>
+                <tr>
+                  <td colspan="9" style="text-align: center; padding: 48px 16px; color: var(--muted);">
+                    <div style="font-size: 32px; margin-bottom: 8px;">💳</div>
+                    <h3 style="margin: 0 0 4px 0; color: var(--text-dark);">No sales recorded yet</h3>
+                    <p style="margin: 0 0 16px 0; font-size: 13px;">Create your first sale to start recording revenue and managing billing.</p>
+                    <a href="/sales/new" class="btn btn-primary">＋ Create First Sale</a>
+                  </td>
+                </tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+</div>
+
+</body>
+</html>
+
