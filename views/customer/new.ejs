@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartStock | Add Customer</title>
+  <link rel="stylesheet" href="/css/sidebar.css">
+  <link rel="stylesheet" href="/css/new.css">
+</head>
+<body>
+  <!-- Shared sidebar: do not duplicate layout markup -->
+  <%- include("../layout/sidebar.ejs") %>
+
+  <section class="customers-content">
+      <div class="page-heading">
+        <div>
+          <h1>Customers</h1>
+          <p>Manage customers, purchases and outstanding payments.</p>
+        </div>
+        <div class="heading-actions">
+          <a href="/customer" class="button button-outline">⇩ &nbsp;Export</a>
+          <a href="/customer/add" class="button button-primary">＋ &nbsp;Add Customer</a>
+        </div>
+      </div>
+
+      <section class="summary-grid">
+        <article class="summary-card">
+          <div class="summary-label"><span class="summary-icon green">♧</span>Total Customers</div>
+          <strong>248</strong>
+          <small>Active customers</small>
+        </article>
+        <article class="summary-card">
+          <div class="summary-label"><span class="summary-icon blue">▣</span>Total Receivable</div>
+          <strong>₹1,24,500</strong>
+          <small>Pending from customers</small>
+        </article>
+        <article class="summary-card">
+          <div class="summary-label"><span class="summary-icon orange">△</span>Overdue Amount</div>
+          <strong>₹38,750</strong>
+          <small>Past due payments</small>
+        </article>
+        <article class="summary-card">
+          <div class="summary-label"><span class="summary-icon green">⊙</span>Payments Received</div>
+          <strong>₹4,82,300</strong>
+          <small>This month</small>
+        </article>
+      </section>
+
+      <div class="background-search">
+        <span>⌕</span>
+        <input type="search" placeholder="Search customers, phone, email...">
+      </div>
+
+      <section class="background-table">
+        <div class="background-table-heading">
+          <strong>All customers</strong>
+          <span>Updated just now</span>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Customer</th><th>Customer ID</th><th>Phone</th>
+              <th>Total Paid</th><th>Pending</th><th>Last Purchase</th>
+              <th>Payment Status</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td><b class="tiny-avatar">RP</b> Raj Patel <small>Retail</small></td><td>CUST-001</td><td>+91 98765 43210</td><td>₹35,000</td><td class="warn">₹10,000</td><td>10 Oct 2026</td><td><span class="status pending">● Pending</span></td><td>•••</td></tr>
+            <tr><td><b class="tiny-avatar">PS</b> Priya Shah <small>Retail</small></td><td>CUST-002</td><td>+91 98765 12345</td><td>₹28,500</td><td>₹0</td><td>08 Oct 2026</td><td><span class="status paid">● Paid</span></td><td>•••</td></tr>
+            <tr><td><b class="tiny-avatar">AM</b> Amit Mehta <small>Wholesale</small></td><td>CUST-003</td><td>+91 98250 77881</td><td>₹95,000</td><td class="danger">₹30,000</td><td>11 Oct 2026</td><td><span class="status overdue">● Overdue</span></td><td>•••</td></tr>
+            <tr><td><b class="tiny-avatar">NM</b> Neha Mehta <small>Retail</small></td><td>CUST-004</td><td>+91 97250 11890</td><td>₹18,750</td><td class="warn">₹1,250</td><td>09 Oct 2026</td><td><span class="status pending">● Pending</span></td><td>•••</td></tr>
+            <tr><td><b class="tiny-avatar">VS</b> Vikram Singh <small>Wholesale</small></td><td>CUST-005</td><td>+91 98980 22014</td><td>₹64,000</td><td class="danger">₹22,000</td><td>07 Oct 2026</td><td><span class="status overdue">● Overdue</span></td><td>•••</td></tr>
+            <tr><td><b class="tiny-avatar">KD</b> Karan Desai <small>Retail</small></td><td>CUST-006</td><td>+91 99090 33456</td><td>₹32,000</td><td>₹0</td><td>06 Oct 2026</td><td><span class="status paid">● Paid</span></td><td>•••</td></tr>
+            <tr><td><b class="tiny-avatar">RK</b> Riya Kapoor <small>Wholesale</small></td><td>CUST-007</td><td>+91 98710 99887</td><td>₹19,800</td><td>₹0</td><td>04 Oct 2026</td><td><span class="status paid">● Paid</span></td><td>•••</td></tr>
+          </tbody>
+        </table>
+        <div class="table-footer">Showing 1–8 of 248 customers</div>
+      </section>
+    </section>
+  </div>
+
+  <div class="modal-backdrop">
+    <section class="customer-modal" role="dialog" aria-modal="true" aria-labelledby="addCustomerTitle">
+      <header class="modal-header">
+        <div>
+          <h2 id="addCustomerTitle">Add Customer</h2>
+          <p>Create a customer profile to track purchases and payments.</p>
+        </div>
+        <a class="close-modal" href="/customer" aria-label="Close Add Customer form">×</a>
+      </header>
+
+      <form action="/customer/add" method="POST" class="customer-form">
+        <div class="form-grid two">
+          <div class="field">
+            <label for="customerName">Customer Name <span>*</span></label>
+            <input id="customerName" name="customerName" type="text" placeholder="Enter customer name" required autofocus>
+          </div>
+
+          <div class="field">
+            <label for="phoneNumber">Phone Number <span>*</span></label>
+            <input id="phoneNumber" name="phoneNumber" type="tel" placeholder="Enter phone number" required>
+          </div>
+
+          <div class="field full">
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" placeholder="Optional email address">
+          </div>
+
+          <div class="field full">
+            <label for="address">Address</label>
+            <input id="address" name="address" type="text" placeholder="Enter street address">
+          </div>
+
+          <div class="field">
+            <label for="city">City</label>
+            <input id="city" name="city" type="text" placeholder="Enter city">
+          </div>
+
+          <div class="field">
+            <label for="state">State</label>
+            <select id="state" name="state">
+              <option value="">Select state</option>
+              <option>Andhra Pradesh</option>
+              <option>Assam</option>
+              <option>Bihar</option>
+              <option>Delhi</option>
+              <option>Goa</option>
+              <option>Gujarat</option>
+              <option>Haryana</option>
+              <option>Karnataka</option>
+              <option>Kerala</option>
+              <option>Madhya Pradesh</option>
+              <option>Maharashtra</option>
+              <option>Punjab</option>
+              <option>Rajasthan</option>
+              <option>Tamil Nadu</option>
+              <option>Telangana</option>
+              <option>Uttar Pradesh</option>
+              <option>West Bengal</option>
+              <option>Other</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="pincode">Pincode</label>
+            <input id="pincode" name="pincode" type="text" inputmode="numeric" maxlength="6" placeholder="Enter pincode">
+          </div>
+
+          <div class="field">
+            <label for="gstin">GSTIN</label>
+            <input id="gstin" name="gstin" type="text" maxlength="15" placeholder="Optional GSTIN">
+          </div>
+
+          <div class="field">
+            <label for="creditLimit">Credit Limit</label>
+            <div class="currency-input">
+              <span>₹</span>
+              <input id="creditLimit" name="creditLimit" type="number" min="0" step="0.01" value="50000">
+            </div>
+          </div>
+
+          <div class="field full">
+            <label for="paymentTerms">Payment Terms</label>
+            <select id="paymentTerms" name="paymentTerms">
+              <option value="Immediate">Immediate</option>
+              <option value="7 Days">7 Days</option>
+              <option value="15 Days" selected>15 Days</option>
+              <option value="30 Days">30 Days</option>
+              <option value="Custom">Custom</option>
+            </select>
+            <div class="term-chips" aria-label="Quick select payment terms">
+              <button type="button" data-term="Immediate">Immediate</button>
+              <button type="button" data-term="7 Days">7 Days</button>
+              <button type="button" data-term="15 Days" class="selected">15 Days</button>
+              <button type="button" data-term="30 Days">30 Days</button>
+              <button type="button" data-term="Custom">Custom</button>
+            </div>
+          </div>
+
+          <div class="field full">
+            <label for="notes">Notes</label>
+            <textarea id="notes" name="notes" rows="2" placeholder="Optional customer notes"></textarea>
+          </div>
+        </div>
+
+        <div class="required-note">* Required fields</div>
+
+        <footer class="modal-footer">
+          <span>Customer ID is generated automatically.</span>
+          <div class="footer-actions">
+            <a href="/customer" class="cancel-button">Cancel</a>
+            <button type="submit" class="save-button">Save Customer</button>
+          </div>
+        </footer>
+      </form>
+    </section>
+  </main>
+</div>
+
+  <script>
+    const termsSelect = document.getElementById("paymentTerms");
+    const termChips = document.querySelectorAll(".term-chips button");
+
+    termChips.forEach(chip => {
+      chip.addEventListener("click", () => {
+        termsSelect.value = chip.dataset.term;
+        termChips.forEach(item => item.classList.toggle("selected", item === chip));
+      });
+    });
+
+    termsSelect.addEventListener("change", () => {
+      termChips.forEach(chip => {
+        chip.classList.toggle("selected", chip.dataset.term === termsSelect.value);
+      });
+    });
+
+    document.querySelector(".customer-form").addEventListener("submit", event => {
+      const pincode = document.getElementById("pincode");
+      if (pincode.value && !/^\d{6}$/.test(pincode.value)) {
+        event.preventDefault();
+        pincode.setCustomValidity("Pincode must contain exactly 6 digits.");
+        pincode.reportValidity();
+      } else {
+        pincode.setCustomValidity("");
+      }
+    });
+
+    document.getElementById("pincode").addEventListener("input", event => {
+      event.target.setCustomValidity("");
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartStock | Customers</title>
+  <link rel="stylesheet" href="/css/sidebar.css">
+  <link rel="stylesheet" href="/css/customers.css">
+</head>
+<body>
+  <!-- Shared application sidebar: do not duplicate sidebar markup here -->
+  <%- include("../layout/sidebar.ejs") %>
+
+    <section class="customers-content">
+
+        <div class="page-heading">
+          <div>
+            <h1>Customers</h1>
+            <p>Manage customers, purchases and outstanding payments.</p>
+          </div>
+
+          <div class="heading-actions">
+            <button class="button button-outline" type="button" id="exportCustomers">
+              <span class="button-icon">⇩</span>
+              Export
+            </button>
+            <a class="button button-primary" href="/customer/add">
+              <span class="plus">＋</span>
+              Add Customer
+            </a>
+          </div>
+        </div>
+
+        <!-- Summary cards -->
+        <section class="summary-grid" aria-label="Customer summary">
+
+          <article class="summary-card">
+            <div class="summary-label">
+              <span class="summary-icon icon-green">♧</span>
+              <span>Total Customers</span>
+            </div>
+            <strong class="summary-value"><%= typeof totalCustomers !== 'undefined' ? totalCustomers.toLocaleString('en-IN') : '248' %></strong>
+            <small>Active customers</small>
+          </article>
+
+          <article class="summary-card">
+            <div class="summary-label">
+              <span class="summary-icon icon-blue">▣</span>
+              <span>Total Receivable</span>
+            </div>
+            <strong class="summary-value">₹<%=Number(summary[0].totalPending).toFixed(2)%></strong>
+            <small>Pending from customers</small>
+          </article>
+
+          <article class="summary-card">
+            <div class="summary-label">
+              <span class="summary-icon icon-orange">△</span>
+              <span>Overdue Amount</span>
+            </div>
+            <strong class="summary-value"><%= typeof overdueAmount !== 'undefined' ? overdueAmount : '₹38,750' %></strong>
+            <small>Past due payments</small>
+          </article>
+
+          <article class="summary-card">
+            <div class="summary-label">
+              <span class="summary-icon icon-green">⊙</span>
+              <span>Payments Received</span>
+            </div>
+            <strong class="summary-value">₹<%= summary[0].totalPaid %></strong>
+            <small>This month</small>
+          </article>
+
+        </section>
+
+        <!-- Search and filters -->
+         <form action="/customer" method="get">
+
+    <!-- Reset pagination when filters change -->
+    <input type="hidden" name="page" value="1" id="pageHiddenInput">
+
+    <section class="customer-controls">
+
+        <!-- Search -->
+        <div class="customer-search">
+            <span>⌕</span>
+
+            <input
+                type="search"
+                name="search"
+                id="customerSearch"
+                placeholder="Search customers, phone, email..."
+                aria-label="Search customers"
+            >
+        </div>
+
+        <div class="filters">
+
+            <!-- Payment Status -->
+            <label class="filter-select">
+                <span class="sr-only">Payment status</span>
+
+                <select name="paymentStatus" id="paymentFilter">
+                    <option value="">Payment Status: All</option>
+                    <option value="Paid">Paid</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Overdue">Overdue</option>
+                </select>
+            </label>
+
+            <!-- Customer Type -->
+            <label class="filter-select">
+                <span class="sr-only">Customer type</span>
+
+                <select name="type" id="typeFilter">
+                    <option value="">Customer Type</option>
+                    <option value="Retail">Retail</option>
+                    <option value="Wholesale">Wholesale</option>
+                </select>
+            </label>
+
+            <!-- Balance -->
+            <label class="filter-select">
+                <span class="sr-only">Outstanding balance</span>
+
+                <select name="balance" id="balanceFilter">
+                    <option value="">Outstanding Balance</option>
+                    <option value="outstanding">Has balance</option>
+                    <option value="clear">No balance</option>
+                </select>
+            </label>
+
+            <!-- Date -->
+            <label class="filter-select">
+                <span class="sr-only">Date range</span>
+
+                <select name="dateRange" id="dateFilter">
+                    <option value="">Date Range</option>
+                    <option value="30">Last 30 days</option>
+                    <option value="90">Last 90 days</option>
+                </select>
+            </label>
+
+            <!-- Sort -->
+            <label class="filter-select filter-sort">
+                <span class="sr-only">Sort customers</span>
+
+                <select name="sort" id="sortFilter">
+                    <option value="">Sort By: Last Purchase</option>
+                    <option value="name">Name: A to Z</option>
+                    <option value="pending">Highest Pending</option>
+                    <option value="purchases">Highest Purchases</option>
+                </select>
+            </label>
+
+            <!-- Limit -->
+            <label class="filter-select filter-limit">
+                <select
+                    name="limit"
+                    id="limitFilter"
+                    class="toolbar-select"
+                >
+                    <option value="10" <%= limit === 10 ? 'selected' : '' %>>10 per page</option>
+                    <option value="25" <%= limit === 25 ? 'selected' : '' %>>25 per page</option>
+                    <option value="50" <%= limit === 50 ? 'selected' : '' %>>50 per page</option>
+                    <option value="100" <%= limit === 100 ? 'selected' : '' %>>100 per page</option>
+                </select>
+            </label>
+            <button type="submit" class="button-primary All-filter">Apply Filters</button>
+        </div>
+    </section>
+</form>
+        <!-- Customers table -->
+        <section class="customers-table-card">
+          <div class="table-card-heading">
+            <h2>All customers</h2>
+            <span class="table-total"><%= typeof totalCustomers !== 'undefined' ? totalCustomers : 248 %> customers</span>
+          </div>
+
+          <div class="table-scroll">
+            <table class="customers-table" id="customersTable">
+              <thead>
+                <tr>
+                  <th>Customer</th>
+                  <th>Phone</th>
+                  <th>Total Purchases</th>
+                  <th>Total Paid</th>
+                  <th>Pending</th>
+                  <th>Last Purchase</th>
+                  <th>Payment Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+
+              <tbody id="customersTableBody">
+                <% customers.forEach(customer => { %>
+
+                <%
+                const pendingValue = Number(customer.outstandingBalance || 0);
+                const status = customer.paymentStatus || 'Paid';
+                const initials = (customer.name || 'Customer')
+                .split(' ')
+                .map(n => n[0])
+                .join('')
+                .substring(0, 2)
+                .toUpperCase();
+                const purchases = Number(customer.totalPurchases || 0);
+                const paid = Number(customer.totalPaid || 0);
+                const lastPurchase = customer.lastPurchaseDate
+                ? new Date(customer.lastPurchaseDate).toLocaleDateString('en-IN')
+                : '—';
+                %>
+                   <tr
+                    data-name="<%= customer.name %>"
+                    data-phone="<%= customer.phone || '' %>"
+                    data-email="<%= customer.email || '' %>"
+                    data-type="<%= customer.type || 'Retail' %>"
+                    data-pending="<%= pendingValue %>"
+                    data-status="<%= status %>"
+                    data-purchases="<%= purchases %>"
+                    >
+                    <td>
+                      <a href="/customer/<%= customer._id %>/view">
+                      <div class="customer-cell">
+                        <span class="customer-avatar"><%= initials %></span>
+                        <span class="customer-name-wrap">
+                          <strong><%= customer.name %></strong>
+                          <!-- <small></small> -->
+                        </span>
+                      </div>
+                      </a>
+                    </td>
+                    <td><%= customer.phone %></td>
+                    <td class="amount">₹<%= purchases.toLocaleString('en-IN') %></td>
+                    <td class="amount">₹<%= paid.toLocaleString('en-IN') %></td>
+                    <td class="amount pending-amount <%= pendingValue > 0 ? (customer.status === 'Overdue' ? 'amount-red' : 'amount-orange') : '' %>">₹<%= pendingValue.toLocaleString('en-IN') %></td>
+                    <td><%= lastPurchase %></td>
+                    <td>
+                      <span class="payment-status stock-badge <%= String(status).toLowerCase() === 'paid' ? 'in-stock' : String(status).toLowerCase() === 'pending' ? 'low-stock' : 'out-of-stock' %>">
+                        <i></i><%= status %>
+                      </span>
+                    </td>
+                    <td class="actions">
+    <div class="action-menu">
+        <button class="action-btn" type="button" onclick="toggleMenu(this)"> ⋯ </button>
+           <div class="action-dropdown">
+                 <a href="/customer/<%= customer._id %>/view">View</a>
+                 <a href="/customer/<%= customer._id %>/edit">Edit</a>
+            </div>
+        </div>
+            </td>
+                </tr>
+                <% }) %>
+              </tbody>
+            </table>
+
+            <div class="empty-state" id="emptyState" hidden>
+              <strong>No customers found</strong>
+              <span>Try changing your search or filters.</span>
+            </div>
+          </div>
+          <div class="table-footer">
+            <span id="tableSummary">Showing customers of <%- totalCustomers %></span>
+            <div class="pagination" aria-label="Pagination">
+               <% if (currentPage===1) { %>
+                 <a href="/customer?page=<%= currentPage-1 %>&&limit=<%= limit %>"><button type="button"disabled><</button></a>
+              <% } %>
+              <% if (currentPage>1) { %>
+                 <a href="/customer?page=<%= currentPage-1 %>&&limit=<%= limit %>"><button type="button"><</button></a>
+              <% } %>
+               <button type="button" class="current"><%= currentPage %></button></a>
+              <% if (currentPage < totalPages) { %>
+                <a href="/customer?page=<%= currentPage+1 %>&&limit=<%= limit %>"><button type="button">></button></a>
+              <% } %>
+               <% if (currentPage == totalPages) { %>
+                <a href="/customer?page=<%= currentPage+1 %>&&limit=<%= limit %>"><button type="button"disabled>></button></a>
+              <% } %>
+            </div>
+          </div>
+        </section>
+
+      </section>
+    </main>
+  </div>
+  <script>
+function toggleMenu(button) {
+    const menu = button.nextElementSibling;
+    // Close other open menus
+    document.querySelectorAll(".action-dropdown.show").forEach(dropdown => {
+        if (dropdown !== menu) {
+            dropdown.classList.remove("show");
+        }
+    });
+
+    menu.classList.toggle("show");
+}
+
+// Close menu when clicking anywhere else
+document.addEventListener("click", function (event) {
+    if (!event.target.closest(".action-menu")) {
+        document.querySelectorAll(".action-dropdown.show")
+            .forEach(dropdown => dropdown.classList.remove("show"));
+    }
+});
+</script>
+</body>
+</html>

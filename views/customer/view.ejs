@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartStock | Customer Details</title>
+  <link rel="stylesheet" href="/css/sidebar.css">
+  <link rel="stylesheet" href="/css/customer-view.css">
+</head>
+<body>
+  <!-- Shared sidebar: keep navigation in the common partial -->
+  <%- include("../layout/sidebar.ejs") %>
+    <section class="details-content">
+        <div class="page-heading">
+          <div>
+            <h1>Customer details</h1>
+            <div class="breadcrumbs">
+              <a href="/customer">Customers</a>
+              <span>/</span>
+              <strong><%=Customer.name%></strong>
+            </div>
+          </div>
+
+          <a href="/customer" class="back-button">← &nbsp; Back to Customers</a>
+        </div>
+        <% const initials = (Customer.name || Customer.customerName || 'C').split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()%>
+        <!-- Main customer identity card -->
+        <section class="customer-profile-card">
+          <div class="customer-identity">
+            <div class="customer-avatar"><%= initials %></div>
+            <div class="identity-copy">
+              <h2><%=Customer.name%></h2>
+            </div>
+          </div>
+          <div class="customer-contact">
+            <div><span class="contact-icon">☎</span> <%=Customer.phone%> </div>
+            <div><span class="contact-icon">✉</span> <%=Customer.email%></div>
+          </div>
+
+          <div class="profile-actions">
+            <a href="/customer/<%= Customer._id %>/edit" class="edit-button">♢ &nbsp; Edit</a>
+            <a href="/payments/new?customerId=CUST-003" class="record-payment-button">⊙ &nbsp; Record Payment</a>
+          </div>
+        </section>
+
+        <!-- Summary metrics -->
+        <section class="metric-grid">
+          <article class="metric-card">
+            <div class="metric-label"><span class="metric-icon blue">▣</span>Total Purchases</div>
+            <strong>₹1,25,000</strong>
+          </article>
+
+          <article class="metric-card">
+            <div class="metric-label"><span class="metric-icon green">⊙</span>Total Paid</div>
+            <strong>₹95,000</strong>
+          </article>
+
+          <article class="metric-card">
+            <div class="metric-label"><span class="metric-icon orange">▤</span>Pending</div>
+            <strong>₹30,000</strong>
+          </article>
+
+          <article class="metric-card">
+            <div class="metric-label"><span class="metric-icon red">△</span>Overdue</div>
+            <strong class="red-text">₹8,000</strong>
+          </article>
+
+          <article class="metric-card">
+            <div class="metric-label"><span class="metric-icon blue">▰</span>Credit Limit</div>
+            <strong>₹50,000</strong>
+          </article>
+
+          <article class="metric-card">
+            <div class="metric-label"><span class="metric-icon green">⊙</span>Available Credit</div>
+            <strong>₹20,000</strong>
+          </article>
+        </section>
+
+        <!-- Credit and customer information -->
+        <section class="info-grid">
+
+          <article class="content-card credit-card">
+            <div class="card-title-row">
+              <h2>Credit information</h2>
+              <span class="payment-term">15 Days</span>
+            </div>
+
+            <div class="credit-metrics">
+              <div>
+                <small>Credit Limit</small>
+                <strong>₹50,000</strong>
+              </div>
+              <div>
+                <small>Used Credit</small>
+                <strong>₹30,000</strong>
+              </div>
+              <div>
+                <small>Available Credit</small>
+                <strong>₹20,000</strong>
+              </div>
+            </div>
+
+            <div class="credit-progress" aria-label="60 percent of credit limit used">
+              <span></span>
+            </div>
+            <p class="progress-note">60% of credit used · ₹20,000 available for new purchases</p>
+          </article>
+
+          <article class="content-card customer-info-card">
+            <h2>Customer information</h2>
+
+            <div class="customer-info-grid">
+              <div>
+                <small>Billing address</small>
+                <p>24 Ashram Road, Ahmedabad<br>Gujarat · 380009</p>
+              </div>
+              <div>
+                <small>GSTIN</small>
+                <p>24AABCM1234D1Z8</p>
+                <small class="sub-label">Customer since</small>
+                <p>18 Sep 2026</p>
+              </div>
+            </div>
+
+            <p class="customer-note">Regular wholesale customer. Send invoices and reminders by email.</p>
+          </article>
+
+        </section>
+
+        <!-- Purchase history -->
+        <section class="content-card history-card">
+          <div class="history-header">
+            <div>
+              <h2>Purchase history</h2>
+              <p>4 invoices · All purchases</p>
+            </div>
+            <button type="button" class="export-button" data-export-table="purchaseTable">⇩ &nbsp; Export</button>
+          </div>
+
+          <div class="table-scroll">
+            <table id="purchaseTable">
+              <thead>
+                <tr>
+                  <th>Invoice No.</th>
+                  <th>Date</th>
+                  <th>Items</th>
+                  <th>Total</th>
+                  <th>Paid</th>
+                  <th>Pending</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="strong-cell">INV-1048</td>
+                  <td>11 Oct 2026</td>
+                  <td>12 items</td>
+                  <td class="dark-cell">₹42,000</td>
+                  <td>₹20,000</td>
+                  <td class="orange-text">₹22,000</td>
+                  <td><span class="status-badge pending"><i></i>Pending</span></td>
+                </tr>
+                <tr>
+                  <td class="strong-cell">INV-1041</td>
+                  <td>01 Oct 2026</td>
+                  <td>8 items</td>
+                  <td class="dark-cell">₹28,000</td>
+                  <td>₹20,000</td>
+                  <td class="red-text">₹8,000</td>
+                  <td><span class="status-badge overdue"><i></i>Overdue</span></td>
+                </tr>
+                <tr>
+                  <td class="strong-cell">INV-1035</td>
+                  <td>25 Sep 2026</td>
+                  <td>10 items</td>
+                  <td class="dark-cell">₹35,000</td>
+                  <td>₹35,000</td>
+                  <td>₹0</td>
+                  <td><span class="status-badge paid"><i></i>Paid</span></td>
+                </tr>
+                <tr>
+                  <td class="strong-cell">INV-1022</td>
+                  <td>18 Sep 2026</td>
+                  <td>6 items</td>
+                  <td class="dark-cell">₹20,000</td>
+                  <td>₹20,000</td>
+                  <td>₹0</td>
+                  <td><span class="status-badge paid"><i></i>Paid</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="history-footer">
+            <span>All invoices shown</span>
+            <strong>Total purchases: ₹1,25,000 <span>·</span> Pending: ₹30,000</strong>
+          </div>
+        </section>
+
+        <!-- Payment history -->
+        <section class="content-card history-card">
+          <div class="history-header">
+            <div>
+              <h2>Payment history</h2>
+              <p>5 payments · All payment methods</p>
+            </div>
+            <button type="button" class="export-button" data-export-table="paymentTable">⇩ &nbsp; Export</button>
+          </div>
+
+          <div class="table-scroll">
+            <table id="paymentTable">
+              <thead>
+                <tr>
+                  <th>Payment ID</th>
+                  <th>Date</th>
+                  <th>Invoice</th>
+                  <th>Amount</th>
+                  <th>Payment Method</th>
+                  <th>Reference</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="strong-cell">PAY-2086</td>
+                  <td>11 Oct 2026</td>
+                  <td>INV-1048</td>
+                  <td class="dark-cell">₹20,000</td>
+                  <td>UPI</td>
+                  <td>UPI-102611084</td>
+                  <td><span class="status-badge paid"><i></i>Completed</span></td>
+                </tr>
+                <tr>
+                  <td class="strong-cell">PAY-2074</td>
+                  <td>01 Oct 2026</td>
+                  <td>INV-1041</td>
+                  <td class="dark-cell">₹20,000</td>
+                  <td>Bank Transfer</td>
+                  <td>NEFT-748210</td>
+                  <td><span class="status-badge paid"><i></i>Completed</span></td>
+                </tr>
+                <tr>
+                  <td class="strong-cell">PAY-2061</td>
+                  <td>25 Sep 2026</td>
+                  <td>INV-1035</td>
+                  <td class="dark-cell">₹25,000</td>
+                  <td>Card</td>
+                  <td>CARD-5518</td>
+                  <td><span class="status-badge paid"><i></i>Completed</span></td>
+                </tr>
+                <tr>
+                  <td class="strong-cell">PAY-2058</td>
+                  <td>25 Sep 2026</td>
+                  <td>INV-1035</td>
+                  <td class="dark-cell">₹10,000</td>
+                  <td>Other</td>
+                  <td>ADJ-0021</td>
+                  <td><span class="status-badge paid"><i></i>Completed</span></td>
+                </tr>
+                <tr>
+                  <td class="strong-cell">PAY-2042</td>
+                  <td>18 Sep 2026</td>
+                  <td>INV-1022</td>
+                  <td class="dark-cell">₹20,000</td>
+                  <td>Cash</td>
+                  <td>CASH-0094</td>
+                  <td><span class="status-badge paid"><i></i>Completed</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="history-footer">
+            <span>All payments shown</span>
+            <strong>Total received: ₹95,000</strong>
+          </div>
+        </section>
+
+        <!-- Example warning state shown in the source design -->
+        <section class="credit-warning-card">
+          <div class="warning-heading">
+            <div>
+              <h2>Alternate credit state · Sanjay Deshmukh</h2>
+              <p>CUST-019 · Different customer example</p>
+            </div>
+          </div>
+
+          <div class="warning-metrics">
+            <div><small>Credit Limit</small><strong>₹50,000</strong></div>
+            <div><small>Used Credit</small><strong class="red-text">₹56,000</strong></div>
+            <div><small>Available Credit</small><strong>₹0</strong></div>
+          </div>
+
+          <div class="warning-progress"><span></span></div>
+
+          <div class="warning-message">
+            <span>⚠</span>
+            Credit limit exceeded ₹6,000 above limit · Review credit before new purchases
+          </div>
+        </section>
+
+      </section>
+    </main>
+  </div>
+
+  <script>
+    document.querySelectorAll("[data-export-table]").forEach(button => {
+      button.addEventListener("click", () => {
+        const table = document.getElementById(button.dataset.exportTable);
+        const rows = Array.from(table.querySelectorAll("tr"));
+        const csv = rows.map(row =>
+          Array.from(row.querySelectorAll("th, td")).map(cell =>
+            '"' + cell.innerText.trim().replace(/"/g, '""') + '"'
+          ).join(",")
+        ).join("\r\n");
+
+        const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = button.dataset.exportTable === "purchaseTable"
+          ? "ananya-mehta-purchase-history.csv"
+          : "ananya-mehta-payment-history.csv";
+        link.click();
+        URL.revokeObjectURL(url);
+      });
+    });
+  </script>
+</body>
+</html>

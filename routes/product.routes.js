@@ -6,6 +6,7 @@ const ProductController = require("../controllers/product.controller.js");
 ProductRouter.get("/", ProductController.inventory);
 ProductRouter.get("/inventory", ProductController.inventory);
 
+
 // Add Product Routes
 ProductRouter.get("/new", ProductController.renderAddProduct);
 ProductRouter.get("/add", ProductController.renderAddProduct);

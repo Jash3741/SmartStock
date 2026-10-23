@@ -2,10 +2,10 @@ const mongoose = require("mongoose");
 const Product = require("./model/product.model.js");
 const Batch = require("./model/batch.model.js");
 const Supplier = require("./model/supplier.model.js");
-
+require("dotenv").config();
 async function seedBatches() {
   try {
-    await mongoose.connect("mongodb://127.0.0.1:27017/smartstock");
+    await mongoose.connect(process.env.MONGO_URL);
     console.log("Connected to MongoDB for batch seeding.");
 
     const supplier = await Supplier.findOne();

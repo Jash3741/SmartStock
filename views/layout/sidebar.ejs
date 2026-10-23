@@ -1,0 +1,174 @@
+<div class="dashboard-app">
+    <aside class="sidebar" id="appSidebar">
+      <button type="button" class="sidebar-close-btn" id="sidebarCloseBtn" aria-label="Close sidebar">✕</button>
+      <a href="/<%= (typeof reqUser !== 'undefined' && reqUser && reqUser._id) ? reqUser._id : '' %>/dashboard" class="brand-link">
+        <div class="brand">
+          <div class="brand-mark"><span></span><span></span><span></span></div>
+          <div class="brand-text">Smart<span>Stock</span></div>
+        </div>
+      </a>
+      <div class="nav-section">
+        <div class="nav-title">WORKSPACE</div>
+        <a href="/<%= (typeof reqUser !== 'undefined' && reqUser && reqUser._id) ? reqUser._id : '' %>/dashboard" class="nav-item <%= (typeof req !== 'undefined' && req.path && req.path.includes('/dashboard')) ? 'active' : '' %>"><span>▦</span>Dashboard</a>
+        <a href="/<%= (typeof reqUser !== 'undefined' && reqUser && reqUser._id) ? reqUser._id : '' %>/products/add" class="nav-item <%= (typeof req !== 'undefined' && req.path && req.path.includes('/add')) ? 'active' : '' %>"><span>⊕</span>Add Product</a>
+        <a href="/inventory" class="nav-item <%= (typeof req !== 'undefined' && req.path && req.path.includes('/inventory')) ? 'active' : '' %>"><span>♧</span>Inventory</a>
+        <a href="/purchases" class="nav-item <%= (typeof req !== 'undefined' && req.path && req.path.includes('/purchases')) ? 'active' : '' %>"><span>🛒</span>Purchases</a>
+        <a href="/sales" class="nav-item <%= (typeof req !== 'undefined' && req.path && req.path.includes('/sales')) ? 'active' : '' %>"><span>$</span>Sales</a>
+        <a href="#" class="nav-item"><span>▥</span>Reports</a>
+      </div>
+
+      <div class="nav-section manage-section">
+        <div class="nav-title">MANAGE</div>
+        <a href="#" class="nav-item"><span>▱</span>Suppliers</a>
+        <a href="/customer" class="nav-item <%= (typeof req !== 'undefined' && req.path && req.path.includes('/customer')) ? 'active' : '' %>"><span>⌖</span>Customers</a>
+        <a href="#" class="nav-item"><span>⚙</span>Settings</a>
+      </div>
+
+      <div class="sidebar-bottom">
+        <div class="health-card">
+          <div class="health-header">
+            <span>Inventory health</span>
+            <strong>92%</strong>
+          </div>
+          <div class="health-bar"><span></span></div>
+          <small>12,486 SKUs synced · 2m ago</small>
+        </div>
+        <a href="/<%= (typeof reqUser !== 'undefined' && reqUser && reqUser._id) ? reqUser._id : '' %>/user/profile" style="display: block; text-decoration: none;">
+          <div class="user-card">
+            <div class="avatar"><%= typeof reqUser !== 'undefined' && reqUser && reqUser.username ? reqUser.username.substring(0, 2).toUpperCase() : 'TM' %></div>
+            <div class="user-info">
+              <strong><%= typeof reqUser !== 'undefined' && reqUser && reqUser.username ? reqUser.username : 'User' %></strong>
+            </div>
+            <i class="online-dot"></i>
+          </div>
+        </a>
+      </div>
+    </aside>
+
+    <!-- Drawer overlay backdrop for mobile/tablet -->
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+  <main class="main">
+
+    <!-- Top bar -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <button type="button" class="hamburger-btn" id="sidebarToggleBtn" aria-label="Toggle navigation menu">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+
+        <form id="globalfilterform" action="/inventory" method="GET" class="search-form">
+          <div class="search">
+            <span class="search-icon">⌕</span>
+            <input
+              type="search"
+              name="globalsearch"
+              placeholder="Search products, SKUs, suppliers..."
+              id="globalSearchInput"
+              aria-label="Search products, SKUs, suppliers"
+            >
+            <kbd>⌘ K</kbd>
+          </div>
+        </form>
+      </div>
+
+      <div class="top-actions">
+        <div class="sync" title="Data synchronized">
+          <i></i>
+          <span>SYNCED NOW</span>
+        </div>
+
+        <button type="button" class="circle-btn" title="Help">?</button>
+
+        <button type="button" class="circle-btn notification" title="Notifications">
+          ♧
+        </button>
+      </div>
+    </header>
+
+    <script>
+      (function() {
+        // Global search keyboard shortcut (⌘ K / Ctrl+K)
+        const searchInput = document.getElementById("globalSearchInput");
+        if (searchInput) {
+          document.addEventListener("keydown", (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+              e.preventDefault();
+              searchInput.focus();
+              searchInput.select();
+            }
+          });
+        }
+
+        // Mobile / Tablet Drawer Toggle Logic
+        const sidebar = document.getElementById("appSidebar");
+        const toggleBtn = document.getElementById("sidebarToggleBtn");
+        const closeBtn = document.getElementById("sidebarCloseBtn");
+        const backdrop = document.getElementById("sidebarBackdrop");
+
+        function openSidebar() {
+          if (!sidebar) return;
+          sidebar.classList.add("sidebar-open");
+          if (backdrop) backdrop.classList.add("active");
+          document.body.classList.add("sidebar-is-open");
+        }
+
+        function closeSidebar() {
+          if (!sidebar) return;
+          sidebar.classList.remove("sidebar-open");
+          if (backdrop) backdrop.classList.remove("active");
+          document.body.classList.remove("sidebar-is-open");
+        }
+
+        if (toggleBtn) {
+          toggleBtn.addEventListener("click", function(e) {
+            e.stopPropagation();
+            if (sidebar && sidebar.classList.contains("sidebar-open")) {
+              closeSidebar();
+            } else {
+              openSidebar();
+            }
+          });
+        }
+
+        if (closeBtn) {
+          closeBtn.addEventListener("click", function(e) {
+            e.stopPropagation();
+            closeSidebar();
+          });
+        }
+
+        if (backdrop) {
+          backdrop.addEventListener("click", function() {
+            closeSidebar();
+          });
+        }
+
+        // Close when clicking any nav link on mobile/tablet screens
+        if (sidebar) {
+          sidebar.querySelectorAll("a").forEach(function(link) {
+            link.addEventListener("click", function() {
+              if (window.innerWidth <= 1024) {
+                closeSidebar();
+              }
+            });
+          });
+        }
+
+        // Close on Escape key
+        document.addEventListener("keydown", function(e) {
+          if (e.key === "Escape" && sidebar && sidebar.classList.contains("sidebar-open")) {
+            closeSidebar();
+          }
+        });
+
+        // Close drawer if user resizes back to desktop
+        window.addEventListener("resize", function() {
+          if (window.innerWidth > 1024 && sidebar && sidebar.classList.contains("sidebar-open")) {
+            closeSidebar();
+          }
+        });
+      })();
+    </script>

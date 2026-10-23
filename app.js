@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const app = express();
 const path = require("path");
@@ -7,16 +8,18 @@ const productRouter = require("./routes/product.routes.js");
 const cookieParser = require("cookie-parser");
 const UserModel = require("./model/user.model.js");
 const sessionMange = require("./utils/middelwares/sessions.middelware.js");
+const methodOverride = require("method-override");
 app.set("view engine", "ejs");
 app.engine("ejs", ejsMate);
 app.use(express.urlencoded({ extended: true }));
+app.use(methodOverride("_method"));
 app.set("views", path.join(__dirname, "views"));
 app.use(express.static(path.join(__dirname, "/public")));
 app.use(cookieParser());
 const mongoose = require("mongoose");
-
+const mongoUrl = process.env.MONGO_URL;
 mongoose
-  .connect("mongodb://127.0.0.1:27017/smartstock")
+  .connect(mongoUrl)
   .then(() => console.log("Connected to MongoDB"))
   .catch((err) => console.error("Connection error:", err));
 
@@ -46,7 +49,7 @@ app.get("/:id/dashboard", async (req, res) => {
   }
 
   const reqUser = await UserModel.findById(id);
-  res.render("./user/dashboard.ejs", { reqUser });
+  res.render("./user/dashboard.ejs", { reqUser, req });
 });
 //Profile
 app.get("/:id/user/profile", (req, res) => {
@@ -83,6 +86,9 @@ const salesRouter = require("./routes/sales.routes.js");
 app.use("/sales", salesRouter);
 app.use("/:id/sales", salesRouter);
 
+//Customer Routes
+const customerRouter = require("./routes/customer.routes.js");
+app.use("/customer",customerRouter);
 
 const port = 4000;
 app.listen(port, () => {

@@ -69,12 +69,6 @@ const saleSchema = new mongoose.Schema(
       default: 0,
     },
 
-    customerName: {
-      type: String,
-      trim: true,
-      default: "Walk-in Customer",
-    },
-
     notes: {
       type: String,
       trim: true,
@@ -85,6 +79,10 @@ const saleSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+    duedate: {
+      type:Date,
+      default:Date.now(),
+    }   
   },
   {
     timestamps: true,

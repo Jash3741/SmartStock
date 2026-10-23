@@ -176,6 +176,7 @@ module.exports.renderSalesHistory = async (req, res) => {
       search,
       statusFilter,
       startDate,
+      req,
       endDate,
       user,
       User: user,
@@ -219,6 +220,7 @@ module.exports.renderNewSale = async (req, res) => {
       customers,
       suggestedInvoiceNumber,
       today,
+      req,
       inStockProducts,
       user,
       User: user,
@@ -374,7 +376,7 @@ module.exports.getProductBatchesApi = async (req, res) => {
       product: productId,
       quantity: { $gt: 0 },
       expiryDate: { $gt: now },
-      status: { $ne: "expired" },
+      // status: { $ne: "expired" },
     })
       .sort({ expiryDate: 1 })
       .lean();
@@ -401,6 +403,7 @@ module.exports.getProductBatchesApi = async (req, res) => {
  * Quick create customer modal helper
  */
 module.exports.createCustomerApi = async (req, res) => {
+  let userId = req.user.id || req.user;
   try {
     const { name, phone, email, address, gstNumber } = req.body;
 
@@ -410,6 +413,7 @@ module.exports.createCustomerApi = async (req, res) => {
 
     const newCustomer = await Customer.create({
       name: name.trim(),
+      userId:userId,
       phone: phone ? phone.trim() : undefined,
       email: email ? email.trim().toLowerCase() : undefined,
       address: address ? address.trim() : undefined,
@@ -726,7 +730,9 @@ module.exports.createSale = async (req, res) => {
 
     try {
       const sessionOpt = useReplicaSetTransaction ? { session } : {};
-
+      const paymentTermDays = parseInt(resolvedCustomer.Payment_term, 10);
+      const duedate = new Date(cleanSaleDate);
+     duedate.setDate(duedate.getDate() + paymentTermDays);
       // STEP 1 — Create Sale Document
       createdSaleDoc = new Sale({
         invoiceNumber: cleanInvoiceNumber,
@@ -743,8 +749,9 @@ module.exports.createSale = async (req, res) => {
         remainingAmount: serverRemainingAmount,
         notes: notes ? notes.trim() : "",
         createdBy: userId,
+        duedate:duedate,
       });
-
+      console.log(duedate);
       await createdSaleDoc.save(sessionOpt);
 
       // Group product deductions to update Product.quantity cleanly
@@ -943,6 +950,7 @@ module.exports.getSaleDetails = async (req, res) => {
       sale,
       items,
       inventoryLogs,
+      req,
       user,
       User: user,
       reqUser: user,

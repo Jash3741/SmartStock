@@ -26,6 +26,8 @@ body {
   font-family: "Inter", Arial, sans-serif;
   color: var(--text);
   background: var(--page-bg);
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 body.modal-open {
@@ -608,5 +610,59 @@ a {
 
   .account-copy small {
     font-size: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .profile-main {
+    padding: 18px 12px 36px;
+  }
+
+  .page-header h1 {
+    font-size: 26px;
+  }
+
+  .account-nav {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .nav-item {
+    font-size: 12px;
+    padding: 0 10px;
+    height: 38px;
+    border-radius: 9px;
+  }
+
+  .profile-card,
+  .account-card {
+    padding: 16px 14px;
+    border-radius: 14px;
+  }
+
+  .personal-info {
+    font-size: 13px;
+  }
+
+  .modal-card {
+    width: calc(100% - 24px);
+    margin: 20px auto;
+    padding: 18px 16px;
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
+  }
+
+  .modal-header h2 {
+    font-size: 20px;
+  }
+
+  .modal-actions {
+    flex-direction: column-reverse;
+  }
+
+  .cancel-button,
+  .save-button {
+    width: 100%;
+    text-align: center;
   }
 }

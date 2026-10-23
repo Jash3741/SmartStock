@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Edit Customer</title>
+
+    <link rel="stylesheet" href="/css/sidebar.css">
+    <link rel="stylesheet" href="/css/customer-edit.css">
+</head>
+<body>
+
+    <%- include("../layout/sidebar.ejs") %>
+    <div class="main-content">
+        <div class="page-header">
+            <div>
+                <h1>Edit Customer</h1>
+                <p>Update customer information</p>
+            </div>
+            <a href="/customer" class="back-btn">
+                ← Back
+            </a>
+        </div>
+        <div class="form-container">
+            <form action="/customer/<%= customer._id %>/edit?_method=PUT" method="POST">
+                <!-- Customer Name -->
+                <div class="form-group">
+                    <label for="name">Customer Name</label>
+                    <input
+                        type="text"
+                        id="name"
+                        name="name"
+                        value="<%= customer.name %>"
+                        placeholder="Enter customer name"
+                        required
+                    >
+                </div>
+                <!-- Phone -->
+                <div class="form-group">
+                    <label for="phone">Phone Number</label>
+                    <input
+                        type="tel"
+                        id="phone"
+                        name="phone"
+                        value="<%= customer.phone %>"
+                        placeholder="Enter phone number"
+                        required
+                    >
+                </div>
+                <!-- Email -->
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        value="<%= customer.email || '' %>"
+                        placeholder="Enter email address"
+                    >
+                </div>
+                <!-- Address -->
+                <div class="form-group">
+                    <label for="address">Address</label>
+                    <textarea
+                        id="address"
+                        name="address"
+                        rows="4"
+                        placeholder="Enter customer address"
+                    ><%= customer.address || '' %></textarea>
+                </div>
+                <!-- Credit Limit -->
+                 <div class="form-group">
+                    <label for="creditLimit">Credit Limit</label>
+                    <input
+                        type="number"
+                        id="creditLimit"
+                        name="creditLimit"
+                        value="<%= customer.Cred_limit || '' %>"
+                        placeholder="Enter email address"
+                    >
+                </div>
+                 <!-- Payment Term -->
+                <div class="form-group">
+                    <label for="type">Payment Term</label>
+                    <select id="type" name="paymentTerms">
+                        <option value="Immediate"
+                            <%= customer.Payment_term === "Immediate" ? "selected" : "" %>>
+                            Immediate
+                        </option>
+                        <option value="7 Days"
+                            <%= customer.Payment_term === "7 Days" ? "selected" : "" %>>
+                            7 Days
+                        </option>
+                        <option value="15 Days"
+                            <%= customer.Payment_term === "15 Days" ? "selected" : "" %>>
+                            15 Days
+                        </option>
+                        <option value="30 Days"
+                            <%= customer.Payment_term === "Days Days" ? "selected" : "" %>>
+                            30 Days
+                        </option>
+                        <option value="custom"
+                            <%= customer.Payment_term === "custom" ? "selected" : "" %>>
+                            custom
+                        </option>
+                    </select>
+                </div>
+                <!-- Status -->
+                <div class="form-group">
+                    <label for="status">Status</label>
+                    <select id="status" name="status">
+                        <option value="active"
+                            <%= customer.status === "active" ? "selected" : "" %>>
+                            Active
+                        </option>
+                        <option value="inactive"
+                            <%= customer.status === "inactive" ? "selected" : "" %>>
+                            Inactive
+                        </option>
+                    </select>
+                </div>
+                <!-- Buttons -->
+                <div class="form-actions">
+                    <a href="/customer" class="cancel-btn">
+                        Cancel
+                    </a>
+                    <button type="submit" class="save-btn">
+                        Update Customer
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+  </main>
+</div>
+</body>
+</html>

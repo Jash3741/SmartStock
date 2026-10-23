@@ -3,6 +3,8 @@ const CategoryModel = require("../model/category.model");
 const SupplierModel = require("../model/supplier.model");
 const UserModel = require("../model/user.model");
 const mongoose = require("mongoose");
+const bwipjs = require("bwip-js");
+const crypto = require("crypto");
 
 // Helper to resolve current user
 async function resolveUser(req) {
@@ -161,6 +163,7 @@ module.exports.inventory = async (req, res) => {
     res.render("./user/inventory.ejs", {
       User: user,
       reqUser: user,
+      req,
       products,
       categories,
       stats,
@@ -197,6 +200,7 @@ module.exports.renderAddProduct = async (req, res) => {
     res.render("./user/add-product.ejs", {
       User: user,
       reqUser: user,
+      req,
       categories,
       suppliers,
     });
@@ -210,80 +214,73 @@ module.exports.renderAddProduct = async (req, res) => {
 module.exports.newProduct = async (req, res) => {
   try {
     const {
-      name,
       productName,
       sku,
       barcode,
       categoryId,
-      category,
-      price,
       sellingPrice,
-      purchasePrice,
       costPrice,
-      supplier,
+      supplierId,
       description,
       tax,
-      gst,
-      minimumStock,
       reorderLevel,
       status,
     } = req.body;
-
-    const finalProductName = (productName || name || "").trim();
-    const finalCategoryId = categoryId || category;
+    console.log(req.body);
+    const finalProductName = (productName || "").trim();
+    const finalCategoryId = categoryId;
 
     const finalSellingPrice = sellingPrice !== undefined && sellingPrice !== "" 
-      ? Number(sellingPrice) 
-      : (price !== undefined && price !== "" ? Number(price) : undefined);
+      ? Number(sellingPrice) : 0;
 
-    const finalPurchasePrice = purchasePrice !== undefined && purchasePrice !== "" 
-      ? Number(purchasePrice) 
-      : (costPrice !== undefined && costPrice !== "" ? Number(costPrice) : 0);
+    const finalPurchasePrice = (costPrice !== undefined && costPrice !== "" ? Number(costPrice) : 0);
 
     // Initial stock is 0 (managed through purchases/inward entries)
     const finalQuantity = 0;
-    const finalGst = gst !== undefined && gst !== "" ? Number(gst) : (tax !== undefined && tax !== "" ? Number(tax) : 0);
-    const finalMinStock = minimumStock !== undefined && minimumStock !== "" 
-      ? Number(minimumStock) 
-      : (reorderLevel !== undefined && reorderLevel !== "" ? Number(reorderLevel) : 5);
+    const finalGst = (tax !== undefined && tax !== "" ? Number(tax) : 0);
+    const finalMinStock = (reorderLevel !== undefined && reorderLevel !== "" ? Number(reorderLevel) : 5);
 
     // Validation
-    if (!finalProductName) {
-      if (req.xhr || req.headers.accept?.includes("application/json")) {
-        return res.status(400).json({ success: false, message: "Product name is required" });
-      }
-      return res.status(400).send("Product name is required");
-    }
+    if (!productName) {
+    return res.status(400).render("./user/add-product.ejs", {
+        error: "Product name is required",
+    });
+}
 
+     // Verify Category exists in database
     if (!finalCategoryId || !mongoose.Types.ObjectId.isValid(finalCategoryId)) {
-      if (req.xhr || req.headers.accept?.includes("application/json")) {
-        return res.status(400).json({ success: false, message: "Valid category is required" });
-      }
-      return res.status(400).send("Invalid category");
+      return res.status(400).render("./user/add-product.ejs", {
+        error: "Invalid Category!!",
+    });
     }
-
-    // Verify Category exists in database
-    const categoryDoc = await CategoryModel.findById(finalCategoryId);
-    if (!categoryDoc) {
-      if (req.xhr || req.headers.accept?.includes("application/json")) {
-        return res.status(400).json({ success: false, message: "Category does not exist" });
-      }
-      return res.status(400).send("Invalid category");
+   const category = await CategoryModel.findById(finalCategoryId);
+    if (!category || category.status === "inactive") {
+    return res.status(400).send("Category does not exist or is inactive");
     }
-
+    //Validation Of FinalSelling Price
     if (finalSellingPrice === undefined || isNaN(finalSellingPrice) || finalSellingPrice < 0) {
-      if (req.xhr || req.headers.accept?.includes("application/json")) {
-        return res.status(400).json({ success: false, message: "Valid selling price is required" });
-      }
-      return res.status(400).send("Valid selling price is required");
+      return res.status(400).render("./user/add-product.ejs",{
+        error:"Invalid Selling Price!!",
+      })
     }
 
     const finalSku = (sku && sku.trim()) || `SKU-${Date.now().toString(36).toUpperCase()}-${Math.floor(100 + Math.random() * 900)}`;
-
+    const finalBarcode =(barcode || "").trim() || `BC-${crypto.randomBytes(6).toString("hex").toUpperCase()}`;
+    const existingProduct = await ProductModel.findOne({
+     $or: [
+    { sku: finalSku },
+    { barcode: finalBarcode }
+  ]
+  });
+    if (existingProduct) {
+  return res.status(400).render("./user/add-product.ejs", {
+    error: "SKU or barcode already exists!"
+  });
+}
     const newProduct = new ProductModel({
       productName: finalProductName,
       sku: finalSku,
-      barcode: barcode ? barcode.trim() : undefined,
+      barcode: finalbarcode,
       category: categoryDoc._id,
       categoryId: categoryDoc._id,
       supplier: supplier ? supplier.trim() : undefined,
@@ -298,23 +295,11 @@ module.exports.newProduct = async (req, res) => {
     });
 
     await newProduct.save();
-
-    if (req.xhr || req.headers.accept?.includes("application/json")) {
-      return res.status(201).json({
-        success: true,
-        message: "Product created successfully",
-        product: newProduct,
-      });
-    }
-
     return res.redirect("/inventory");
   } catch (err) {
     console.error("CREATE PRODUCT ERROR:", err);
     if (err.code === 11000) {
       const field = Object.keys(err.keyPattern || {})[0] || "SKU/Barcode";
-      if (req.xhr || req.headers.accept?.includes("application/json")) {
-        return res.status(409).json({ success: false, message: `Product with this ${field} already exists` });
-      }
       return res.status(409).send(`Product with this ${field} already exists`);
     }
 
@@ -355,6 +340,7 @@ module.exports.getProductDetails = async (req, res) => {
     res.render("./user/edit-product.ejs", {
       User: user,
       reqUser: user,
+      req,
       product,
       isViewOnly: true
     });
@@ -386,6 +372,7 @@ module.exports.renderEditProduct = async (req, res) => {
     res.render("./user/edit-product.ejs", {
       User: user,
       reqUser: user,
+      req,
       product,
       categories,
       suppliers,

@@ -106,6 +106,7 @@ module.exports.renderPurchaseHistory = async (req, res) => {
       search,
       statusFilter,
       user,
+      req,
       User: user,
       reqUser: user,
     });
@@ -146,6 +147,7 @@ module.exports.renderNewPurchase = async (req, res) => {
       suggestedInvoiceNumber,
       today,
       user,
+      req,
       User: user,
       reqUser: user,
     });
@@ -678,6 +680,7 @@ module.exports.getPurchaseDetails = async (req, res) => {
       inventoryLogs,
       user,
       User: user,
+      req,
       reqUser: user,
     });
   } catch (err) {

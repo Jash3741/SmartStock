@@ -4,124 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SmartStock - Purchase History</title>
+  <link rel="stylesheet" href="/css/sidebar.css">
   <link rel="stylesheet" href="/css/purchase.css">
 </head>
 <body>
-
-<div class="app">
-
   <!-- ================= SIDEBAR ================= -->
-  <aside class="sidebar">
-
-    <a href="/<%= User._id %>/dashboard" class="brand">
-      <span class="brand-mark">
-        <i></i><i></i><i></i>
-      </span>
-      <span>Smart<span>Stock</span></span>
-    </a>
-
-    <button class="workspace">
-      <span class="workspace-icon">▣</span>
-      <span class="workspace-text">
-        <strong>Northline Ops</strong>
-        <small>4 locations</small>
-      </span>
-      <span class="workspace-arrow">⌄</span>
-    </button>
-
-    <nav class="navigation">
-      <div class="nav-title">WORKSPACE</div>
-
-      <a href="/<%= User._id %>/dashboard" class="nav-item">
-        <span>▦</span>
-        Dashboard
-      </a>
-
-      <a href="/products/add" class="nav-item">
-        <span>⊕</span>
-        Add Product
-      </a>
-
-      <a href="/inventory" class="nav-item">
-        <span>♧</span>
-        Inventory
-      </a>
-
-      <a href="/purchases" class="nav-item active">
-        <span>🛒</span>
-        Purchases
-      </a>
-
-      <a href="/sales" class="nav-item">
-        <span>$</span>
-        Sales
-      </a>
-
-      <a href="/reports" class="nav-item">
-        <span>▥</span>
-        Reports
-      </a>
-
-      <div class="nav-title manage-title">MANAGE</div>
-
-      <a href="/suppliers" class="nav-item">
-        <span>▱</span>
-        Suppliers
-      </a>
-
-      <a href="/locations" class="nav-item">
-        <span>⌖</span>
-        Locations
-      </a>
-
-      <a href="/settings" class="nav-item">
-        <span>⚙</span>
-        Settings
-      </a>
-    </nav>
-
-    <div class="sidebar-bottom">
-      <div class="health-card">
-        <div class="health-top">
-          <span>Inventory health</span>
-          <strong>92%</strong>
-        </div>
-        <div class="health-bar">
-          <span></span>
-        </div>
-        <small>Real-time Inventory sync active</small>
-      </div>
-
-      <a href="/<%= User._id %>/user/profile" class="user">
-        <div class="avatar">
-          <%= typeof reqUser !== 'undefined' && reqUser?.username
-              ? reqUser.username.substring(0, 2).toUpperCase()
-              : 'TM' %>
-        </div>
-        <div class="user-info">
-          <strong><%= typeof reqUser !== 'undefined' && reqUser?.username ? reqUser.username : 'Admin' %></strong>
-          <small>Verified User</small>
-        </div>
-      </a>
-    </div>
-
-  </aside>
+  <%- include("../layout/sidebar.ejs") %>
 
   <!-- ================= MAIN CONTENT ================= -->
-  <main class="main">
-
-    <!-- Topbar -->
-    <header class="topbar">
-      <div class="topbar-left">
-        <h2 class="topbar-title">Purchase History</h2>
-        <span class="badge-tag">Invoices</span>
-      </div>
-      <div class="topbar-actions">
-        <a href="/purchases/new" class="btn btn-primary btn-sm">＋ New Purchase</a>
-      </div>
-    </header>
-
-    <div class="content-container">
+  <div class="content-container">
 
       <!-- Page Header -->
       <div class="page-header-row">
@@ -297,11 +188,8 @@
       </div>
 
     </div>
-
   </main>
-
 </div>
-
 </body>
 </html>
 

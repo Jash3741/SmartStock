@@ -5,82 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SmartStock Inventory Dashboard</title>
   <link rel="stylesheet" href="/css/dashboard.css">
+    <link rel="stylesheet" href="/css/sidebar.css">
 </head>
 <body>
-  <div class="dashboard-app">
-
-    <!-- Sidebar -->
-    <aside class="sidebar">
-      <div class="brand">
-        <div class="brand-mark"><span></span><span></span><span></span></div>
-        <div class="brand-text">Smart<span>Stock</span></div>
-      </div>
-
-      <button class="workspace-card">
-        <div class="workspace-icon">▣</div>
-        <div class="workspace-info">
-          <strong>Northline Ops</strong>
-          <small>4 locations</small>
-        </div>
-        <div class="workspace-arrows">⌃<br>⌄</div>
-      </button>
-
-      <div class="nav-section">
-        <div class="nav-title">WORKSPACE</div>
-        <a href="#" class="nav-item active"><span>▦</span>Dashboard</a>
-        <a href="/<%= reqUser._id %>/products/add" class="nav-item"><span>⊕</span>Add Product</a>
-        <a href="/inventory" class="nav-item"><span>♧</span>Inventory</a>
-        <a href="/purchases" class="nav-item"><span>🛒</span>Purchases</a>
-        <a href="/sales" class="nav-item"><span>$</span>Sales</a>
-        <a href="#" class="nav-item"><span>▥</span>Reports</a>
-      </div>
-
-      <div class="nav-section manage-section">
-        <div class="nav-title">MANAGE</div>
-        <a href="#" class="nav-item"><span>▱</span>Suppliers</a>
-        <a href="#" class="nav-item"><span>⌖</span>Locations</a>
-        <a href="#" class="nav-item"><span>⚙</span>Settings</a>
-      </div>
-
-      <div class="sidebar-bottom">
-        <div class="health-card">
-          <div class="health-header">
-            <span>Inventory health</span>
-            <strong>92%</strong>
-          </div>
-          <div class="health-bar"><span></span></div>
-          <small>12,486 SKUs synced · 2m ago</small>
-        </div>
-        <a href="/<%=reqUser._id%>/user/profile">
-        <div class="user-card">
-          <div class="avatar">TM</div>
-          <div class="user-info">
-            <strong><%=reqUser.username%></strong>
-            <!-- <small>Operations admin</small> -->
-          </div>
-        
-          <i class="online-dot"></i>
-        </div>
-      </div>
-    </aside>
-  </a>
-    <!-- Main -->
-    <main class="main">
-      <header class="topbar">
-        <div class="search">
-          <span class="search-icon">⌕</span>
-          <input type="search" placeholder="Search products, SKUs, suppliers...">
-          <kbd>⌘ K</kbd>
-        </div>
-
-        <div class="top-actions">
-          <div class="sync-pill"><i></i>SYNCED NOW</div>
-          <button class="icon-button">?</button>
-          <button class="icon-button bell">♧<i></i></button>
-          <button class="date-button">▣&nbsp;&nbsp; Sep 1 – Sep 30 <span>⌄</span></button>
-        </div>
-      </header>
-
+    <!-- Shared Sidebar + App Shell Layout -->
+    <%- include("../layout/sidebar.ejs") %>
       <div class="content">
         <div class="welcome-row">
           <div>

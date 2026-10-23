@@ -1,9 +1,9 @@
 const mongoose = require("mongoose");
 const Supplier = require("./model/supplier.model.js");
-
+require("dotenv").config();
 async function seedSuppliers() {
   try {
-    await mongoose.connect("mongodb://127.0.0.1:27017/smartstock");
+    await mongoose.connect(process.env.MONGO_URL);
     console.log("Connected to MongoDB for supplier seeding.");
 
     const existingCount = await Supplier.countDocuments();

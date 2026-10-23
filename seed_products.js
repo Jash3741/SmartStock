@@ -1,10 +1,10 @@
 const mongoose = require("mongoose");
 const Category = require("./model/category.model.js");
-const Unit = require("./model/unit.model.js");
+// const Unit = require("./model/unit.model.js");
 const Product = require("./model/product.model.js");
-
+require("dotenv").config();
 async function seedTestData() {
-  await mongoose.connect("mongodb://127.0.0.1:27017/smartstock");
+  await mongoose.connect(process.env.MONGO_URL);
   console.log("Connected to MongoDB.");
 
   // Categories to create if not present
@@ -34,30 +34,30 @@ async function seedTestData() {
   }
 
   // Units to create if not present
-  const unitsData = [
-    { name: "Piece", symbol: "pcs" },
-    { name: "Kilogram", symbol: "kg" },
-    { name: "Gram", symbol: "g" },
-    { name: "Litre", symbol: "L" },
-    { name: "Box", symbol: "box" },
-    { name: "Packet", symbol: "pkt" }
-  ];
+  // const unitsData = [
+  //   { name: "Piece", symbol: "pcs" },
+  //   { name: "Kilogram", symbol: "kg" },
+  //   { name: "Gram", symbol: "g" },
+  //   { name: "Litre", symbol: "L" },
+  //   { name: "Box", symbol: "box" },
+  //   { name: "Packet", symbol: "pkt" }
+  // ];
 
-  const unitMap = {};
-  for (const u of unitsData) {
-    let unitDoc = await Unit.findOne({ name: u.name });
-    if (!unitDoc) {
-      unitDoc = await Unit.create({ name: u.name, symbol: u.symbol, status: "active" });
-      console.log(`Created Unit: ${u.name} (${u.symbol})`);
-    }
-    unitMap[u.name] = unitDoc._id;
-  }
+  // const unitMap = {};
+  // for (const u of unitsData) {
+  //   let unitDoc = await Unit.findOne({ name: u.name });
+  //   if (!unitDoc) {
+  //     unitDoc = await Unit.create({ name: u.name, symbol: u.symbol, status: "active" });
+  //     console.log(`Created Unit: ${u.name} (${u.symbol})`);
+  //   }
+  //   unitMap[u.name] = unitDoc._id;
+  // }
 
-  // Also map existing Unit Piece with symbol 'pices'
-  const existingPiece = await Unit.findOne({ name: "Piece" });
-  if (existingPiece) {
-    unitMap["Piece"] = existingPiece._id;
-  }
+  // // Also map existing Unit Piece with symbol 'pices'
+  // const existingPiece = await Unit.findOne({ name: "Piece" });
+  // if (existingPiece) {
+  //   unitMap["Piece"] = existingPiece._id;
+  // }
 
   // Sample test products with diverse names, categories, prices, and stock statuses
   const testProducts = [
@@ -66,7 +66,6 @@ async function seedTestData() {
       sku: "SKU-ELEC-001",
       barcode: "890111222001",
       categoryName: "Electronics",
-      unitName: "Piece",
       purchasePrice: 1200,
       sellingPrice: 1899,
       quantity: 45, // In Stock
@@ -79,7 +78,6 @@ async function seedTestData() {
       sku: "SKU-ELEC-002",
       barcode: "890111222002",
       categoryName: "Electronics",
-      unitName: "Piece",
       purchasePrice: 90,
       sellingPrice: 249,
       quantity: 3, // Low Stock (<= 5)
@@ -92,7 +90,6 @@ async function seedTestData() {
       sku: "SKU-ELEC-003",
       barcode: "890111222003",
       categoryName: "Electronics",
-      unitName: "Piece",
       purchasePrice: 2100,
       sellingPrice: 3499,
       quantity: 0, // Out of Stock
@@ -105,7 +102,6 @@ async function seedTestData() {
       sku: "SKU-BEV-001",
       barcode: "890111222004",
       categoryName: "Beverages",
-      unitName: "Packet",
       purchasePrice: 220,
       sellingPrice: 275,
       quantity: 80, // In Stock
@@ -118,7 +114,6 @@ async function seedTestData() {
       sku: "SKU-BEV-002",
       barcode: "890111222005",
       categoryName: "Beverages",
-      unitName: "Piece",
       purchasePrice: 280,
       sellingPrice: 340,
       quantity: 4, // Low Stock
@@ -131,7 +126,6 @@ async function seedTestData() {
       sku: "SKU-SNK-001",
       barcode: "890111222006",
       categoryName: "Snacks & Biscuits",
-      unitName: "Packet",
       purchasePrice: 25,
       sellingPrice: 35,
       quantity: 120, // In Stock
@@ -144,7 +138,6 @@ async function seedTestData() {
       sku: "SKU-SNK-002",
       barcode: "890111222007",
       categoryName: "Snacks & Biscuits",
-      unitName: "Packet",
       purchasePrice: 15,
       sellingPrice: 20,
       quantity: 2, // Low Stock
@@ -157,7 +150,6 @@ async function seedTestData() {
       sku: "SKU-DRY-001",
       barcode: "890111222008",
       categoryName: "Dairy",
-      unitName: "Litre",
       purchasePrice: 62,
       sellingPrice: 72,
       quantity: 60, // In Stock
@@ -170,7 +162,6 @@ async function seedTestData() {
       sku: "SKU-DRY-002",
       barcode: "890111222009",
       categoryName: "Dairy",
-      unitName: "Packet",
       purchasePrice: 240,
       sellingPrice: 275,
       quantity: 0, // Out of Stock
@@ -183,7 +174,6 @@ async function seedTestData() {
       sku: "SKU-GRN-001",
       barcode: "890111222010",
       categoryName: "Grains & Pulses",
-      unitName: "Litre",
       purchasePrice: 130,
       sellingPrice: 155,
       quantity: 40, // In Stock
@@ -196,7 +186,6 @@ async function seedTestData() {
       sku: "SKU-GRN-002",
       barcode: "890111222011",
       categoryName: "Grains & Pulses",
-      unitName: "Kilogram",
       purchasePrice: 380,
       sellingPrice: 475,
       quantity: 25, // In Stock
@@ -209,7 +198,6 @@ async function seedTestData() {
       sku: "SKU-OFF-001",
       barcode: "890111222012",
       categoryName: "Office Supplies",
-      unitName: "Box",
       purchasePrice: 240,
       sellingPrice: 320,
       quantity: 18, // In Stock
@@ -224,7 +212,6 @@ async function seedTestData() {
     const existing = await Product.findOne({ sku: p.sku });
     if (!existing) {
       const catId = categoryMap[p.categoryName] || categoryMap["Biscuit"];
-      const uId = unitMap[p.unitName] || unitMap["Piece"];
 
       await Product.create({
         productName: p.productName,
@@ -232,8 +219,6 @@ async function seedTestData() {
         barcode: p.barcode,
         category: catId,
         categoryId: catId,
-        unit: uId,
-        unitId: uId,
         purchasePrice: p.purchasePrice,
         sellingPrice: p.sellingPrice,
         price: p.sellingPrice,
